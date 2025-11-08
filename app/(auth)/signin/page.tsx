@@ -19,7 +19,7 @@ import Link from "next/link";
 export default function SignInPage() {
   const router = useRouter();
   const supabase = createClient();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -34,23 +34,23 @@ export default function SignInPage() {
     setError("");
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
 
       if (signInError) throw signInError;
 
       if (data.user) {
-        // Successfully signed in - redirect to home
-        router.push("/");
-        router.refresh();
+        // Force a hard redirect using window.location
+        window.location.href = "/";
       }
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
-    } finally {
       setIsLoading(false);
     }
+    // Don't set isLoading to false on success - let the redirect happen
   };
 
   return (
@@ -205,7 +205,8 @@ export default function SignInPage() {
                         setFormData({ ...formData, email: e.target.value })
                       }
                       required
-                      className="w-full pl-12 pr-4 py-4 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                      disabled={isLoading}
+                      className="w-full pl-12 pr-4 py-4 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all disabled:opacity-50"
                       placeholder="john@example.com"
                     />
                   </div>
@@ -233,13 +234,15 @@ export default function SignInPage() {
                         setFormData({ ...formData, password: e.target.value })
                       }
                       required
-                      className="w-full pl-12 pr-12 py-4 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                      disabled={isLoading}
+                      className="w-full pl-12 pr-12 py-4 bg-black/40 border border-white/20 rounded-xl text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all disabled:opacity-50"
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-emerald-400 transition-colors"
+                      disabled={isLoading}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-emerald-400 transition-colors disabled:opacity-50"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -252,14 +255,17 @@ export default function SignInPage() {
 
                 {/* Submit Button */}
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   type="submit"
                   disabled={isLoading}
                   className="w-full py-4 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Signing in...</span>
+                    </>
                   ) : (
                     <>
                       Sign In
