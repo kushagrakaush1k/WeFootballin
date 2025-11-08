@@ -19,7 +19,6 @@ import {
   Zap,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 interface Team {
   id: string;
@@ -63,58 +62,31 @@ export default function AdminDashboard() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const supabase = createClient();
-  const router = useRouter();
 
   useEffect(() => {
-    checkAdminAccess();
     fetchData();
   }, []);
-
-  const checkAdminAccess = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      router.push("/signin");
-      return;
-    }
-
-    const { data: userData } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single<{ role: string }>();
-
-    if (!userData || userData.role !== "admin") {
-      router.push("/");
-      return;
-    }
-  };
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const { data: teamsData } = await supabase
-        .from("teams")
-        .select("*")
-        .eq("payment_status", "approved")
-        .order("points", { ascending: false });
+      const [teamsResult, pendingResult, playersResult] = await Promise.all([
+        supabase
+          .from("teams")
+          .select("*")
+          .eq("payment_status", "approved")
+          .order("points", { ascending: false }),
+        supabase
+          .from("teams")
+          .select("*")
+          .eq("payment_status", "pending")
+          .order("created_at", { ascending: false }),
+        supabase.from("team_players").select("*").order("team_id"),
+      ]);
 
-      const { data: pendingData } = await supabase
-        .from("teams")
-        .select("*")
-        .eq("payment_status", "pending")
-        .order("created_at", { ascending: false });
-
-      const { data: playersData } = await supabase
-        .from("team_players")
-        .select("*")
-        .order("team_id");
-
-      setTeams(teamsData || []);
-      setPendingTeams(pendingData || []);
-      setPlayers(playersData || []);
+      setTeams(teamsResult.data || []);
+      setPendingTeams(pendingResult.data || []);
+      setPlayers(playersResult.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -131,7 +103,15 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
-      await fetchData();
+      setPendingTeams((prev) => prev.filter((t) => t.id !== teamId));
+      const approvedTeam = pendingTeams.find((t) => t.id === teamId);
+      if (approvedTeam) {
+        setTeams((prev) => [
+          ...prev,
+          { ...approvedTeam, payment_status: "approved" },
+        ]);
+      }
+
       alert("Team approved successfully!");
     } catch (error) {
       console.error("Error approving team:", error);
@@ -150,7 +130,7 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
-      await fetchData();
+      setPendingTeams((prev) => prev.filter((t) => t.id !== teamId));
       alert("Team rejected");
     } catch (error) {
       console.error("Error rejecting team:", error);
@@ -174,32 +154,23 @@ export default function AdminDashboard() {
         .delete()
         .eq("team_id", teamId);
 
-      if (playersError) {
-        console.error("Error deleting players:", playersError);
-        throw new Error(
-          `Failed to delete team players: ${playersError.message}`
-        );
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (playersError) throw playersError;
 
       const { error: teamError } = await supabase
         .from("teams")
         .delete()
         .eq("id", teamId);
 
-      if (teamError) {
-        console.error("Error deleting team:", teamError);
-        throw new Error(`Failed to delete team: ${teamError.message}`);
-      }
+      if (teamError) throw teamError;
 
-      await fetchData();
+      setTeams((prev) => prev.filter((t) => t.id !== teamId));
+      setPendingTeams((prev) => prev.filter((t) => t.id !== teamId));
+      setPlayers((prev) => prev.filter((p) => p.team_id !== teamId));
+
       alert(`Team "${teamName}" deleted successfully!`);
     } catch (error: any) {
       console.error("Delete operation failed:", error);
-      alert(
-        `Failed to delete team: ${error.message}\n\nPlease check:\n1. Database RLS policies allow admin deletions\n2. No foreign key constraints are blocking deletion\n3. You have proper admin permissions`
-      );
+      alert(`Failed to delete team: ${error.message}`);
     } finally {
       setIsDeleting(false);
     }
@@ -219,7 +190,14 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
-      await fetchData();
+      setTeams((prev) =>
+        prev.map((t) =>
+          t.id === teamId
+            ? { ...t, ...stats, goal_difference: goalDifference }
+            : t
+        )
+      );
+
       setShowEditModal(false);
       setSelectedTeam(null);
       alert("Team stats updated successfully!");
@@ -770,6 +748,13 @@ export default function AdminDashboard() {
                     );
                   })}
                 </div>
+
+                {players.length === 0 && (
+                  <div className="text-center py-12">
+                    <UserCheck className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">No players found</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

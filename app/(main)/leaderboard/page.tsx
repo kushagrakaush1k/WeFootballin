@@ -12,48 +12,14 @@ export default function LeaderboardPage() {
     "ALL"
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
     fetchTeams();
-
-    // Set up real-time subscription
-    const channel = supabase
-      .channel("leaderboard-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "teams",
-        },
-        (payload) => {
-          console.log("Team changed:", payload);
-          fetchTeams();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [selectedGroup]);
 
   const fetchTeams = async () => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      // Create timeout promise (10 seconds)
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(
-          () =>
-            reject(new Error("Request timeout - please check your connection")),
-          10000
-        )
-      );
-
       let query = supabase
         .from("teams")
         .select("*")
@@ -66,104 +32,56 @@ export default function LeaderboardPage() {
         query = query.eq("league_group", selectedGroup);
       }
 
-      // Race between the query and timeout
-      const { data, error: fetchError } = (await Promise.race([
-        query,
-        timeoutPromise,
-      ])) as any;
+      const { data, error } = await query;
 
-      if (fetchError) {
-        throw fetchError;
-      }
-
+      if (error) throw error;
       setTeams(data || []);
-    } catch (err: any) {
-      console.error("Error fetching teams:", err);
-      setError(err.message || "Failed to load teams. Please try again.");
-      setTeams([]); // Set empty array so UI shows "no teams" message
+    } catch (error) {
+      console.error("Error fetching teams:", error);
+      setTeams([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const getRankIcon = (index: number) => {
-    switch (index) {
-      case 0:
-        return <Trophy className="w-6 h-6 text-yellow-400" />;
-      case 1:
-        return <Medal className="w-6 h-6 text-gray-400" />;
-      case 2:
-        return <Award className="w-6 h-6 text-orange-600" />;
-      default:
-        return (
-          <span className="text-gray-500 font-bold text-lg">#{index + 1}</span>
-        );
-    }
-  };
-
-  const getRankBadgeColor = (index: number) => {
-    switch (index) {
-      case 0:
-        return "bg-yellow-500/20 border-yellow-500/50";
-      case 1:
-        return "bg-gray-400/20 border-gray-400/50";
-      case 2:
-        return "bg-orange-500/20 border-orange-500/50";
-      default:
-        return "bg-white/5 border-white/10";
-    }
+    if (index === 0) return <Trophy className="w-6 h-6 text-yellow-400" />;
+    if (index === 1) return <Medal className="w-6 h-6 text-gray-400" />;
+    if (index === 2) return <Award className="w-6 h-6 text-orange-600" />;
+    return (
+      <span className="text-gray-500 font-bold text-lg">#{index + 1}</span>
+    );
   };
 
   const groups = [
-    { value: "ALL", label: "All Groups", color: "emerald" },
-    { value: "A", label: "Group A", color: "blue" },
-    { value: "B", label: "Group B", color: "purple" },
-    { value: "C", label: "Group C", color: "pink" },
+    { value: "ALL", label: "All Groups" },
+    { value: "A", label: "Group A" },
+    { value: "B", label: "Group B" },
+    { value: "C", label: "Group C" },
   ] as const;
 
-  const stats = [
-    {
-      icon: Target,
-      label: "Total Teams",
-      value: teams.length,
-      color: "emerald",
-    },
-    {
-      icon: Zap,
-      label: "Matches Played",
-      value: teams.reduce((sum, t) => sum + t.matches_played, 0),
-      color: "blue",
-    },
-    {
-      icon: TrendingUp,
-      label: "Total Goals",
-      value: teams.reduce((sum, t) => sum + t.goals_for, 0),
-      color: "purple",
-    },
-  ];
+  const stats = {
+    totalTeams: teams.length,
+    totalMatches: teams.reduce((sum, t) => sum + t.matches_played, 0),
+    totalGoals: teams.reduce((sum, t) => sum + t.goals_for, 0),
+  };
 
   return (
     <div className="min-h-screen bg-black pt-24 pb-16">
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
-          >
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6">
             <Trophy className="w-5 h-5 text-emerald-400" />
             <span className="text-sm font-bold text-emerald-400">
               ROCK8 LEAGUE
             </span>
-          </motion.div>
+          </div>
 
           <h1 className="text-5xl md:text-6xl font-black mb-4">
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
@@ -175,64 +93,42 @@ export default function LeaderboardPage() {
           </p>
         </motion.div>
 
-        {/* Group Filters */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {groups.map((group) => (
-            <motion.button
+            <button
               key={group.value}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedGroup(group.value)}
               className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                 selectedGroup === group.value
-                  ? `bg-${group.color}-500 text-white shadow-lg`
+                  ? "bg-emerald-500 text-white shadow-lg"
                   : "bg-white/5 text-gray-400 hover:bg-white/10"
               }`}
             >
               {group.label}
-            </motion.button>
+            </button>
           ))}
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 bg-red-500/10 border border-red-500/50 rounded-xl p-4 text-center"
-          >
-            <p className="text-red-400 font-semibold mb-2">{error}</p>
-            <button
-              onClick={fetchTeams}
-              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
-            >
-              Try Again
-            </button>
-          </motion.div>
-        )}
-
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {stats.map((stat, i) => (
-            <motion.div
+          {[
+            { icon: Target, label: "Total Teams", value: stats.totalTeams },
+            { icon: Zap, label: "Matches Played", value: stats.totalMatches },
+            { icon: TrendingUp, label: "Total Goals", value: stats.totalGoals },
+          ].map((stat, i) => (
+            <div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
             >
-              <stat.icon className={`w-8 h-8 text-${stat.color}-400 mb-3`} />
+              <stat.icon className="w-8 h-8 text-emerald-400 mb-3" />
               <div className="text-3xl font-black text-white mb-1">
                 {stat.value}
               </div>
               <div className="text-sm text-gray-400">{stat.label}</div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Leaderboard Table */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
-          {/* Table Header */}
           <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 px-6 py-4 border-b border-white/10">
             <div className="grid grid-cols-12 gap-4 text-sm font-bold text-emerald-400 uppercase tracking-wider">
               <div className="col-span-1">Rank</div>
@@ -246,7 +142,6 @@ export default function LeaderboardPage() {
             </div>
           </div>
 
-          {/* Table Body */}
           <div className="divide-y divide-white/10">
             {isLoading ? (
               <div className="p-12 text-center">
@@ -259,27 +154,22 @@ export default function LeaderboardPage() {
                 <p className="text-lg font-semibold">No teams found</p>
                 <p className="text-sm mt-2">
                   {selectedGroup === "ALL"
-                    ? "No approved teams yet. Check back soon!"
-                    : `No approved teams in Group ${selectedGroup} yet`}
+                    ? "No teams registered yet"
+                    : `No teams in Group ${selectedGroup} yet`}
                 </p>
               </div>
             ) : (
               teams.map((team, index) => (
-                <motion.div
+                <div
                   key={team.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`grid grid-cols-12 gap-4 px-6 py-4 hover:bg-white/5 transition-colors group ${
-                    index < 3 ? getRankBadgeColor(index) : ""
-                  }`}
+                  className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-white/5 transition-colors"
                 >
                   <div className="col-span-1 flex items-center">
                     {getRankIcon(index)}
                   </div>
                   <div className="col-span-4 flex items-center">
                     <div>
-                      <div className="font-bold text-white group-hover:text-emerald-400 transition-colors">
+                      <div className="font-bold text-white">
                         {team.team_name}
                       </div>
                       <div className="text-xs text-gray-500">
@@ -310,26 +200,20 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Legend */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-gray-400"
-        >
+        <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-gray-400">
           <div>MP: Matches Played</div>
           <div>W: Wins</div>
           <div>D: Draws</div>
           <div>L: Losses</div>
           <div>GD: Goal Difference</div>
           <div>PTS: Points</div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
