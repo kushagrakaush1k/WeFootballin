@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
-    request,
+    request: {
+      headers: request.headers,
+    },
   })
 
   const supabase = createServerClient(
@@ -21,7 +23,9 @@ export async function middleware(request: NextRequest) {
             ...options,
           })
           response = NextResponse.next({
-            request,
+            request: {
+              headers: request.headers,
+            },
           })
           response.cookies.set({
             name,
@@ -36,7 +40,9 @@ export async function middleware(request: NextRequest) {
             ...options,
           })
           response = NextResponse.next({
-            request,
+            request: {
+              headers: request.headers,
+            },
           })
           response.cookies.set({
             name,
@@ -48,53 +54,26 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - this is critical for auth
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh session if expired
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Protected routes
-  const protectedRoutes = ['/dashboard', '/register-team', '/profile']
-  const adminRoutes = ['/admin']
-  const authRoutes = ['/login', '/signup']
-
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
-  const isAdminRoute = adminRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
-  const isAuthRoute = authRoutes.some(route => 
+  // Define public routes (only auth pages and API)
+  const publicRoutes = ['/signup', '/signin', '/api', '/auth']
+  const isPublicRoute = publicRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
   )
 
-  // Redirect to login if accessing protected route without authentication
-  if (isProtectedRoute && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirectTo', request.nextUrl.pathname)
+  // If user is NOT logged in and trying to access ANY page except auth pages
+  // Force them to signup
+  if (!user && !isPublicRoute) {
+    const url = new URL('/signup', request.url)
     return NextResponse.redirect(url)
   }
 
-  // Check admin access
-  if (isAdminRoute && user) {
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (userData?.role !== 'admin') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
-  }
-
-  // Redirect to dashboard if accessing auth routes while authenticated
-  if (isAuthRoute && user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+  // If user IS logged in and trying to access signup/signin pages
+  // Send them to homepage
+  if (user && (request.nextUrl.pathname === '/signup' || request.nextUrl.pathname === '/signin')) {
+    const url = new URL('/', request.url)
     return NextResponse.redirect(url)
   }
 
@@ -108,7 +87,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public assets (images, etc)
+     * - public files (images, etc)
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

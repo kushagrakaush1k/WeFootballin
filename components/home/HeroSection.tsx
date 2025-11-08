@@ -1,165 +1,249 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowRight, Sparkles, Trophy } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Trophy,
+  Zap,
+  Users,
+  Calendar,
+  Award,
+  X,
+  ChevronRight,
+  Sparkles,
+  Target,
+  Shield,
+} from "lucide-react";
 
-export default function HeroSection() {
+interface TimeLeft {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}
+
+interface MousePos {
+  x: number;
+  y: number;
+}
+
+const HeroSection = () => {
+  const [showSignup, setShowSignup] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({});
+  const [mousePos, setMousePos] = useState<MousePos>({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const deadline = new Date("2025-11-15T23:59:59").getTime();
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const diff = deadline - now;
+
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleMouse = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
+
+  const handleGetStarted = () => {
+    setShowSignup(true);
+  };
+
+  const handleSignupComplete = () => {
+    setShowSignup(false);
+    setShowRegister(true);
+  };
+
+  const FloatingBall = ({
+    delay,
+    duration,
+  }: {
+    delay: number;
+    duration: number;
+  }) => (
+    <div
+      className="absolute w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full opacity-20 animate-bounce"
+      style={{
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${delay}s`,
+        animationDuration: `${duration}s`,
+      }}
+    />
+  );
+
   return (
-    <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden pt-16 pb-8">
-      {/* Animated background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-1/4 -left-48 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute bottom-1/4 -right-48 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"
-        />
-      </div>
+    <div className="relative min-h-screen bg-black overflow-hidden">
+      {/* Animated Background Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0a0a0a_1px,transparent_1px),linear-gradient(to_bottom,#0a0a0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-30" />
 
-      {/* Prize Pool Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="max-w-3xl mx-auto mb-8 px-4"
-      >
-        <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-8">
-          <h3 className="text-2xl font-black mb-6 text-center">
-            <Trophy className="w-8 h-8 inline mr-2" />
-            PRIZE POOL & DELIVERABLES
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-4xl font-black text-yellow-600 mb-2">
-                ₹3L+
+      {/* Floating Balls */}
+      {[...Array(12)].map((_, i) => (
+        <FloatingBall key={i} delay={i * 0.4} duration={2.5 + i * 0.3} />
+      ))}
+
+      {/* Gradient Orbs */}
+      <div
+        className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-[140px] opacity-30 animate-pulse"
+        style={{
+          transform: `translate(${mousePos.x * 0.02}px, ${
+            mousePos.y * 0.02
+          }px)`,
+        }}
+      />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-[140px] opacity-20 animate-pulse"
+        style={{
+          transform: `translate(${-mousePos.x * 0.02}px, ${
+            -mousePos.y * 0.02
+          }px)`,
+          animationDelay: "1s",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-6 pt-20 pb-32">
+        {/* Top Badge */}
+        <div className="flex justify-center mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-sm">
+            <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <span className="text-sm font-bold text-emerald-400">
+              Official Community Partners
+            </span>
+          </div>
+        </div>
+
+        {/* Main Hero Content */}
+        <div className="text-center space-y-8 max-w-5xl mx-auto">
+          {/* Brand Collaboration Title */}
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-7xl font-black">
+              <span className="text-white">ROCK8</span>
+              <span className="text-emerald-400 mx-4">×</span>
+              <span className="text-white">WeFootballin'</span>
+            </h1>
+            <div className="h-1 w-32 bg-gradient-to-r from-transparent via-emerald-500 to-transparent mx-auto" />
+          </div>
+
+          {/* Subtitle */}
+          <h2 className="text-4xl md:text-6xl font-black text-emerald-400">
+            LEAGUE 2025-26
+          </h2>
+
+          <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Delhi's most{" "}
+            <span className="text-emerald-400 font-bold">ELITE</span> football
+            tournament!
+            <br />
+            12 teams. ₹3 Lakh prize pool. One legendary champion.
+          </p>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-12">
+            {[
+              { icon: Users, label: "12 Teams", value: "Elite Competition" },
+              { icon: Trophy, label: "₹3 Lakh", value: "Prize Pool" },
+              {
+                icon: Calendar,
+                label: "Nov 28 - Dec 20",
+                value: "Tournament Dates",
+              },
+              { icon: Award, label: "Premium Perks", value: "Jersey + Medals" },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="group p-6 rounded-2xl bg-zinc-900/50 backdrop-blur-md border border-zinc-800 hover:bg-zinc-900 hover:border-emerald-500/50 transition-all duration-300 hover:scale-105"
+              >
+                <stat.icon className="w-8 h-8 text-emerald-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                <div className="text-2xl font-bold text-white mb-1">
+                  {stat.label}
+                </div>
+                <div className="text-sm text-gray-500">{stat.value}</div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                Total Prize Money
-              </div>
+            ))}
+          </div>
+
+          {/* Countdown Timer */}
+          <div className="mt-12">
+            <div className="text-emerald-400 text-sm font-bold mb-4 flex items-center justify-center gap-2">
+              <Zap className="w-4 h-4 animate-pulse" />
+              REGISTRATION DEADLINE
             </div>
-            <div className="text-center">
-              <div className="text-lg font-bold mb-2">Delhi Heights</div>
-              <div className="text-sm text-muted-foreground">
-                Premium Beverages
-              </div>
+            <div className="flex justify-center gap-4">
+              {Object.entries(timeLeft).map(([unit, value]) => (
+                <div key={unit} className="text-center">
+                  <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 min-w-[100px] shadow-2xl shadow-emerald-500/20 border border-emerald-400/30">
+                    <div className="text-4xl md:text-5xl font-black text-black mb-2">
+                      {String(value).padStart(2, "0")}
+                    </div>
+                    <div className="text-xs text-black/70 uppercase font-bold tracking-wider">
+                      {unit}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="text-center">
-              <div className="text-lg font-bold mb-2">Iki Gai & More</div>
-              <div className="text-sm text-muted-foreground">
-                Exclusive Rewards
-              </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+            <button
+              onClick={() => (window.location.href = "/register-team")}
+              className="group relative px-10 py-5 rounded-xl bg-emerald-500 text-black font-black text-lg hover:bg-emerald-400 transition-all duration-300 shadow-[0_0_40px_rgba(16,185,129,0.4)] hover:shadow-[0_0_60px_rgba(16,185,129,0.6)] hover:scale-105"
+            >
+              <span className="relative flex items-center gap-2">
+                Register Your Team Now
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+
+            <button
+              onClick={() => window.open("YOUR_GOOGLE_DOC_LINK_HERE", "_blank")}
+              className="px-10 py-5 rounded-xl bg-zinc-900/50 backdrop-blur-md border border-zinc-800 text-white font-bold text-lg hover:bg-zinc-900 hover:border-emerald-500/50 transition-all duration-300"
+            >
+              View Tournament Details
+            </button>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="mt-16 pt-8 border-t border-zinc-800">
+            <p className="text-gray-600 text-sm font-bold mb-6 tracking-wider">
+              CONFIRMED TEAMS
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              {[
+                "Nexus FC",
+                "Goal Hunterz",
+                "Spartans",
+                "Delhi Elites",
+                "Dwarka United",
+              ].map((team, i) => (
+                <div
+                  key={i}
+                  className="px-6 py-3 rounded-full bg-zinc-900/50 backdrop-blur-md border border-zinc-800 text-gray-400 text-sm font-bold hover:border-emerald-500/50 hover:text-emerald-400 transition-all"
+                >
+                  {team}
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </motion.div>
-
-      {/* Main Hero Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
-          >
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">
-              Join the movement
-            </span>
-          </motion.div>
-
-          <motion.h1
-            className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
-            <span className="bg-gradient-to-r from-primary via-green-500 to-emerald-600 bg-clip-text text-transparent">
-              We
-            </span>
-            <span className="text-foreground">Footballin'</span>
-          </motion.h1>
-
-          <motion.p
-            className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-          >
-            Find games. Track stats. Connect with players.
-            <br />
-            <span className="text-foreground font-semibold">
-              Your ultimate football community.
-            </span>
-          </motion.p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-          >
-            <Link href="/games">
-              <Button
-                size="lg"
-                className="football-gradient text-white text-lg px-10 h-14 group shadow-lg hover:shadow-primary/50 transition-all"
-              >
-                Find Games
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-10 h-14 border-2 hover:bg-primary/5"
-              >
-                Sign Up Free
-              </Button>
-            </Link>
-          </motion.div>
-
-          <motion.div
-            className="mt-16 text-sm text-muted-foreground"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.4, duration: 1 }}
-          >
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="text-2xl"
-            >
-              ↓
-            </motion.div>
-          </motion.div>
-        </motion.div>
       </div>
-    </section>
+    </div>
   );
-}
+};
+
+export default HeroSection;

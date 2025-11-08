@@ -1,0 +1,672 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Users,
+  UserPlus,
+  Upload,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  Trophy,
+  Shield,
+  AlertCircle,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+
+interface Player {
+  name: string;
+  phone: string;
+  instagram: string;
+}
+
+export default function RegisterTeamPage() {
+  const [step, setStep] = useState(1);
+  const [teamName, setTeamName] = useState("");
+  const [leagueGroup, setLeagueGroup] = useState<"A" | "B" | "C">("A");
+  const [players, setPlayers] = useState<Player[]>([
+    { name: "", phone: "", instagram: "" },
+  ]);
+  const [captainIndex, setCaptainIndex] = useState(0);
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  const supabase = createClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      // Redirect to signup page immediately
+      router.push("/auth/signup");
+      return;
+    }
+
+    setUser(user);
+
+    // Check if user already has a team
+    const { data: existingTeam } = await supabase
+      .from("teams")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingTeam) {
+      setError("You have already registered a team!");
+      setTimeout(() => router.push("/leaderboard"), 3000);
+    }
+  };
+
+  const addPlayer = () => {
+    if (players.length < 15) {
+      setPlayers([...players, { name: "", phone: "", instagram: "" }]);
+    }
+  };
+
+  const removePlayer = (index: number) => {
+    if (players.length > 1) {
+      const newPlayers = players.filter((_, i) => i !== index);
+      setPlayers(newPlayers);
+      if (captainIndex === index) setCaptainIndex(0);
+      if (captainIndex > index) setCaptainIndex(captainIndex - 1);
+    }
+  };
+
+  const updatePlayer = (index: number, field: keyof Player, value: string) => {
+    const newPlayers = [...players];
+    newPlayers[index][field] = value;
+    setPlayers(newPlayers);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB");
+        return;
+      }
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        setError("Please upload an image file");
+        return;
+      }
+      setPaymentScreenshot(file);
+      setError(null);
+    }
+  };
+
+  const uploadPaymentScreenshot = async (file: File, teamId: string) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${teamId}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from("team-payments")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("team-payments").getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      throw new Error("Failed to upload payment screenshot");
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!user) {
+      setError("Please login to register a team");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Step 1: Create team
+      const { data: teamData, error: teamError } = await supabase
+        .from("teams")
+        .insert({
+          user_id: user.id,
+          team_name: teamName.trim(),
+          league_group: leagueGroup,
+          payment_status: "pending",
+        })
+        .select()
+        .single();
+
+      if (teamError) throw teamError;
+
+      // Step 2: Upload payment screenshot
+      let paymentUrl = null;
+      if (paymentScreenshot) {
+        paymentUrl = await uploadPaymentScreenshot(
+          paymentScreenshot,
+          teamData.id
+        );
+
+        // Update team with payment screenshot URL
+        const { error: updateError } = await supabase
+          .from("teams")
+          .update({ payment_screenshot_url: paymentUrl })
+          .eq("id", teamData.id);
+
+        if (updateError) throw updateError;
+      }
+
+      // Step 3: Insert players
+      const playersData = players.map((player, index) => ({
+        team_id: teamData.id,
+        player_name: player.name.trim(),
+        phone: player.phone.trim(),
+        instagram: player.instagram.trim() || null,
+        is_captain: index === captainIndex,
+      }));
+
+      const { error: playersError } = await supabase
+        .from("team_players")
+        .insert(playersData);
+
+      if (playersError) throw playersError;
+
+      // Success!
+      setStep(4);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setError(error.message || "Failed to register team. Please try again.");
+      setIsSubmitting(false);
+    }
+  };
+
+  const canProceed = () => {
+    switch (step) {
+      case 1:
+        return teamName.trim().length >= 3;
+      case 2:
+        return (
+          players.every((p) => p.name.trim() && p.phone.trim()) &&
+          players.length >= 8 &&
+          players.length <= 15
+        );
+      case 3:
+        return paymentScreenshot !== null;
+      default:
+        return false;
+    }
+  };
+
+  const totalSteps = 3;
+  const progress = (step / totalSteps) * 100;
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Redirecting to signup...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black pt-24 pb-16">
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.2, 0.1],
+          }}
+          transition={{ duration: 20, repeat: Infinity }}
+          className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.1, 0.15, 0.1],
+          }}
+          transition={{ duration: 25, repeat: Infinity }}
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+          >
+            <Trophy className="w-5 h-5 text-emerald-400" />
+            <span className="text-sm font-bold text-emerald-400">
+              ROCK8 LEAGUE REGISTRATION
+            </span>
+          </motion.div>
+
+          <h1 className="text-4xl md:text-5xl font-black mb-4">
+            <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
+              Register Your Team
+            </span>
+          </h1>
+          <p className="text-lg text-gray-400">
+            Join the most competitive football league
+          </p>
+        </motion.div>
+
+        {/* Error Alert */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <p className="text-red-400 text-sm">{error}</p>
+          </motion.div>
+        )}
+
+        {/* Progress Bar */}
+        {step <= 3 && (
+          <div className="mb-8">
+            <div className="flex justify-between mb-3">
+              <span className="text-sm font-semibold text-gray-300">
+                Step {step} of {totalSteps}
+              </span>
+              <span className="text-sm font-semibold text-emerald-400">
+                {Math.round(progress)}%
+              </span>
+            </div>
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-emerald-500 to-green-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Form Container */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10"
+        >
+          <AnimatePresence mode="wait">
+            {/* Step 1: Team Name & Group */}
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Team Details
+                    </h2>
+                    <p className="text-gray-400">
+                      Choose your team name and group
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Team Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    className="w-full px-6 py-4 bg-black/40 border border-white/20 rounded-xl text-white text-lg placeholder:text-gray-500 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                    placeholder="e.g., Thunder Strikers"
+                    maxLength={50}
+                  />
+                  <p className="text-xs text-gray-500">Minimum 3 characters</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Select League Group *
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {(["A", "B", "C"] as const).map((group) => (
+                      <button
+                        key={group}
+                        type="button"
+                        onClick={() => setLeagueGroup(group)}
+                        className={`px-6 py-4 rounded-xl font-bold text-lg transition-all ${
+                          leagueGroup === group
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                            : "bg-black/40 border border-white/20 text-gray-400 hover:border-emerald-500/50"
+                        }`}
+                      >
+                        Group {group}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 2: Players */}
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                        Squad Details
+                      </h2>
+                      <p className="text-gray-400">
+                        {players.length} players (min 8, max 15)
+                      </p>
+                    </div>
+                  </div>
+
+                  {players.length < 15 && (
+                    <button
+                      onClick={addPlayer}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 text-emerald-400 rounded-lg font-semibold transition-all"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Add
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                  {players.map((player, index) => (
+                    <div
+                      key={index}
+                      className="bg-black/40 border border-white/10 rounded-xl p-4 space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                            {index + 1}
+                          </div>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="captain"
+                              checked={captainIndex === index}
+                              onChange={() => setCaptainIndex(index)}
+                              className="w-4 h-4 accent-emerald-500"
+                            />
+                            <span className="text-sm text-gray-400">
+                              Captain
+                            </span>
+                          </label>
+                        </div>
+
+                        {players.length > 1 && (
+                          <button
+                            onClick={() => removePlayer(index)}
+                            className="text-red-400 hover:text-red-300 text-sm font-semibold"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          value={player.name}
+                          onChange={(e) =>
+                            updatePlayer(index, "name", e.target.value)
+                          }
+                          placeholder="Player Name *"
+                          className="px-4 py-2 bg-black/60 border border-white/20 rounded-lg text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:outline-none"
+                        />
+                        <input
+                          type="tel"
+                          value={player.phone}
+                          onChange={(e) =>
+                            updatePlayer(index, "phone", e.target.value)
+                          }
+                          placeholder="Phone Number *"
+                          className="px-4 py-2 bg-black/60 border border-white/20 rounded-lg text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={player.instagram}
+                          onChange={(e) =>
+                            updatePlayer(index, "instagram", e.target.value)
+                          }
+                          placeholder="Instagram (optional)"
+                          className="px-4 py-2 bg-black/60 border border-white/20 rounded-lg text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Payment */}
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Payment Proof
+                    </h2>
+                    <p className="text-gray-400">
+                      Upload your payment screenshot
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/30 rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-bold text-white mb-3">
+                    Payment Details
+                  </h3>
+                  <div className="space-y-2 text-gray-300">
+                    <p>
+                      <strong className="text-emerald-400">Amount:</strong>{" "}
+                      ₹5,000
+                    </p>
+                    <p>
+                      <strong className="text-emerald-400">UPI ID:</strong>{" "}
+                      wefootballin@paytm
+                    </p>
+                    <p>
+                      <strong className="text-emerald-400">Account:</strong>{" "}
+                      1234567890
+                    </p>
+                  </div>
+                </div>
+
+                <label className="block">
+                  <div className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-500/50 transition-all">
+                    {paymentScreenshot ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-3 text-emerald-400">
+                          <CheckCircle2 className="w-6 h-6" />
+                          <span className="font-semibold">
+                            {paymentScreenshot.name}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                          {(paymentScreenshot.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-white font-semibold mb-1">
+                          Upload Payment Screenshot
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Click to browse files (Max 5MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </motion.div>
+            )}
+
+            {/* Step 4: Success */}
+            {step === 4 && (
+              <motion.div
+                key="step4"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                  className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6"
+                >
+                  <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+                </motion.div>
+
+                <h2 className="text-3xl font-black text-white mb-4">
+                  Registration Submitted!
+                </h2>
+                <p className="text-gray-400 mb-8">
+                  Your team registration is under review. You'll receive
+                  confirmation once approved by admin.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <a
+                    href="/leaderboard"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-emerald-500/50 transition-all"
+                  >
+                    View Leaderboard
+                    <ArrowRight className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="/"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition-all"
+                  >
+                    Back to Home
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Navigation Buttons */}
+          {step <= 3 && (
+            <div className="flex gap-4 mt-8 pt-6 border-t border-white/10">
+              {step > 1 && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setStep(step - 1)}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back
+                </motion.button>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() =>
+                  step === 3 ? handleSubmit() : setStep(step + 1)
+                }
+                disabled={!canProceed() || isSubmitting}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    {step === 3 ? "Submit Registration" : "Continue"}
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(16, 185, 129, 0.5);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(16, 185, 129, 0.7);
+        }
+      `}</style>
+    </div>
+  );
+}

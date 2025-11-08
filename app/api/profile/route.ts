@@ -3,50 +3,68 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  try {
-    const user = await getUserWithRole();
-    return NextResponse.json({ user });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 401 });
+  const authResult = await requireAuth();
+  
+  if (authResult instanceof NextResponse) {
+    return authResult;
   }
+  
+  const { user, supabase } = authResult;
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ user, profile });
 }
 
 export async function PUT(request: Request) {
+  const authResult = await requireAuth();
+  
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  
+  const { user, supabase } = authResult;
+
   try {
-    const user = await requireAuth();
     const body = await request.json();
 
-    const supabase = await createClient();
-
-    // Update user
-    const { error: userError } = await supabase
-      .from('users')
-      .update({
-        name: body.name,
+    // Update user metadata
+    const { error: userError } = await supabase.auth.updateUser({
+      data: {
+        full_name: body.full_name,
         phone: body.phone,
-      })
-      .eq('id', user.id);
+      }
+    });
 
     if (userError) {
       return NextResponse.json({ error: userError.message }, { status: 500 });
     }
 
-    // Update stats if provided
-    if (body.position || body.preferredFoot) {
-      const { error: statsError } = await supabase
-        .from('player_stats')
-        .update({
-          position: body.position,
-          preferred_foot: body.preferredFoot,
-        })
-        .eq('user_id', user.id);
+    // Update profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        full_name: body.full_name,
+        phone: body.phone,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+      .select()
+      .single();
 
-      if (statsError) {
-        console.error('Stats update error:', statsError);
-      }
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Profile updated' });
+    return NextResponse.json({ profile });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

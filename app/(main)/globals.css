@@ -70,7 +70,6 @@
 .football-gradient:hover {
   background: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(var(--primary)));
 }
-
   .football-glow {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
@@ -88,47 +87,4 @@
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
-}
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-}
-
-body {
-  background: linear-gradient(to bottom, #000000, #052e16);
-  min-height: 100vh;
-}
-
-/* Remove any default margins from main elements */
-main,
-section,
-div {
-  margin-block-start: 0;
-  margin-block-end: 0;
-}
-
-/* Ensure Next.js root elements don't add spacing */
-#__next {
-  margin: 0;
-  padding: 0;
-}
-
-/* Remove focus outline for better aesthetics (optional) */
-*:focus {
-  outline: none;
-  outline-offset: 0;
-}
-
-/* Smooth scrolling for anchor links */
-html {
-  scroll-padding-top: 80px; /* Account for fixed navbar */
 }
