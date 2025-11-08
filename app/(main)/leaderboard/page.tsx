@@ -12,6 +12,7 @@ export default function LeaderboardPage() {
     "ALL"
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -41,8 +42,18 @@ export default function LeaderboardPage() {
 
   const fetchTeams = async () => {
     setIsLoading(true);
+    setError(null);
 
     try {
+      // Create timeout promise (10 seconds)
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(new Error("Request timeout - please check your connection")),
+          10000
+        )
+      );
+
       let query = supabase
         .from("teams")
         .select("*")
@@ -55,15 +66,21 @@ export default function LeaderboardPage() {
         query = query.eq("league_group", selectedGroup);
       }
 
-      const { data, error } = await query;
+      // Race between the query and timeout
+      const { data, error: fetchError } = (await Promise.race([
+        query,
+        timeoutPromise,
+      ])) as any;
 
-      if (error) {
-        console.error("Error fetching teams:", error);
-      } else {
-        setTeams(data || []);
+      if (fetchError) {
+        throw fetchError;
       }
-    } catch (error) {
-      console.error("Unexpected error:", error);
+
+      setTeams(data || []);
+    } catch (err: any) {
+      console.error("Error fetching teams:", err);
+      setError(err.message || "Failed to load teams. Please try again.");
+      setTeams([]); // Set empty array so UI shows "no teams" message
     } finally {
       setIsLoading(false);
     }
@@ -177,6 +194,23 @@ export default function LeaderboardPage() {
           ))}
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 bg-red-500/10 border border-red-500/50 rounded-xl p-4 text-center"
+          >
+            <p className="text-red-400 font-semibold mb-2">{error}</p>
+            <button
+              onClick={fetchTeams}
+              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </motion.div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {stats.map((stat, i) => (
@@ -225,8 +259,8 @@ export default function LeaderboardPage() {
                 <p className="text-lg font-semibold">No teams found</p>
                 <p className="text-sm mt-2">
                   {selectedGroup === "ALL"
-                    ? "No approved teams yet"
-                    : `No approved teams in Group ${selectedGroup}`}
+                    ? "No approved teams yet. Check back soon!"
+                    : `No approved teams in Group ${selectedGroup} yet`}
                 </p>
               </div>
             ) : (
