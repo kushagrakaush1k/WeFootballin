@@ -1,5 +1,3 @@
-// COMPLETE FIX - Replace your entire admin/page.tsx with this
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -82,27 +80,13 @@ export default function AdminDashboard() {
       return;
     }
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    const userData = data as { role: string } | null;
-
-    if (!userData || userData.role !== "admin") {
-      router.push("/");
-      return;
-    }
-
-    // FIX: Add explicit type annotation here
     const { data: userData } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single<{ role: string }>();
 
-    if (userData?.role !== "admin") {
+    if (!userData || userData.role !== "admin") {
       router.push("/");
       return;
     }
