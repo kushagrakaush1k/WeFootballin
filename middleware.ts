@@ -64,9 +64,9 @@ export async function middleware(request: NextRequest) {
   )
 
   // If user is NOT logged in and trying to access ANY page except auth pages
-  // Force them to signup
+  // Redirect them to SIGNIN (changed from signup)
   if (!user && !isPublicRoute) {
-    const url = new URL('/signup', request.url)
+    const url = new URL('/signin', request.url)
     return NextResponse.redirect(url)
   }
 
