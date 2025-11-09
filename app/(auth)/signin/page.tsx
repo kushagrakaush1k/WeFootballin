@@ -1,248 +1,352 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Mail,
   Lock,
   Eye,
   EyeOff,
+  User,
+  Phone,
   ArrowRight,
   Sparkles,
-  Trophy,
-  Zap,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
-import Link from "next/link";
+import { signUpUser, signInUser } from "@/lib/auth.client";
 
-export default function SignInPage() {
+export default function AuthPage() {
   const router = useRouter();
-  const supabase = createClient();
 
+  const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [step, setStep] = useState("form");
+  const [otp, setOtp] = useState(["", "", "", "", "", "", "", ""]);
+
+  const [signInData, setSignInData] = useState({
     email: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [signUpData, setSignUpData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) value = value[0];
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 7) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
     e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, 8);
+    if (!/^\d+$/.test(pastedData)) return;
+
+    const newOtp = pastedData.split("").concat(Array(8).fill("")).slice(0, 8);
+    setOtp(newOtp);
+
+    const lastIndex = Math.min(pastedData.length, 7);
+    document.getElementById(`otp-${lastIndex}`)?.focus();
+  };
+
+  const handleSignIn = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-
-      if (signInError) throw signInError;
-
-      if (data.user) {
-        window.location.href = "/";
+      if (!signInData.email || !signInData.password) {
+        setError("Please fill in all fields");
+        setIsLoading(false);
+        return;
       }
-    } catch (err: any) {
-      setError(err.message || "Invalid email or password");
+
+      const { user, error: signInError } = await signInUser({
+        email: signInData.email,
+        password: signInData.password,
+      });
+
+      if (signInError) {
+        setError(signInError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (user) {
+        // Smooth transition to home
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        router.push("/");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      console.error(err);
       setIsLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-white via-emerald-50 to-green-50 flex items-center justify-center p-4">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
-            opacity: [0.03, 0.06, 0.03],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-emerald-400/20 via-green-400/20 to-teal-400/20 blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [90, 0, 90],
-            opacity: [0.02, 0.05, 0.02],
-          }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-cyan-400/20 via-blue-400/20 to-purple-400/20 blur-3xl"
-        />
+  const handleSignUp = async () => {
+    setIsLoading(true);
+    setError("");
 
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#10b98105_1px,transparent_1px),linear-gradient(to_bottom,#10b98105_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-      </div>
+    try {
+      if (signUpData.password !== signUpData.confirmPassword) {
+        setError("Passwords do not match");
+        setIsLoading(false);
+        return;
+      }
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-        {/* Left Side - Branding */}
+      if (signUpData.password.length < 6) {
+        setError("Password must be at least 6 characters");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!signUpData.email || !signUpData.fullName || !signUpData.phone) {
+        setError("Please fill in all fields");
+        setIsLoading(false);
+        return;
+      }
+
+      const { user, error: signUpError } = await signUpUser({
+        email: signUpData.email,
+        password: signUpData.password,
+        fullName: signUpData.fullName,
+        phone: signUpData.phone,
+      });
+
+      if (signUpError) {
+        setError(signUpError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (user) {
+        // Move to OTP verification
+        setStep("verify");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const otpCode = otp.join("");
+
+      if (otpCode.length !== 8) {
+        setError("Please enter complete verification code");
+        setIsLoading(false);
+        return;
+      }
+
+      // Smooth transition to home after email verification
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      router.push("/");
+    } catch (err) {
+      setError("OTP verification failed. Please try again.");
+      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
+  if (step === "verify") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center p-4">
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="hidden lg:block space-y-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-emerald-200/50 p-6 sm:p-10 max-w-lg w-full"
         >
+          <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+          </div>
+
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-3">
+              Verify Your Email
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-2">
+              We've sent a verification link to
+            </p>
+            <p className="text-emerald-600 font-bold text-base sm:text-lg break-all px-4">
+              {signUpData.email}
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-300 text-red-600 px-4 py-3 rounded-xl text-sm mb-6">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-6">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border-2 border-emerald-300 shadow-sm"
-            >
-              <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-bold text-emerald-700">
-                WELCOME BACK
-              </span>
-            </motion.div>
-
-            <h1 className="text-7xl font-black leading-tight">
-              <span className="block bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                We
-              </span>
-              <span className="block text-gray-900">Footballin'</span>
-            </h1>
-
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Continue your football journey. Connect, compete, and conquer.
-            </p>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-4 pt-4">
-            {[
-              { icon: Trophy, label: "Active Players", value: "500+" },
-              { icon: Zap, label: "Matches Played", value: "150+" },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + i * 0.1 }}
-                className="bg-white/90 backdrop-blur-sm border-2 border-emerald-200 rounded-2xl p-5 shadow-lg"
+            <div>
+              <p className="text-sm text-gray-600 text-center mb-4">
+                Click the link in your email to verify your account. Once
+                verified, click the button below to continue.
+              </p>
+              <button
+                onClick={handleVerifyOTP}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 px-6 py-3 sm:py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                <stat.icon className="w-8 h-8 text-emerald-600 mb-2" />
-                <div className="text-2xl font-bold text-gray-900">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Redirecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>I've Verified My Email</span>
+                  </>
+                )}
+              </button>
+            </div>
 
-          <div className="pt-6 border-t-2 border-emerald-200">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">
-              POWERED BY
-            </p>
-            <div className="flex items-center gap-6">
-              <div className="text-gray-900 font-bold text-lg">LupLu</div>
-              <div className="w-px h-8 bg-emerald-300" />
-              <div className="text-gray-900 text-sm">IKIGAI</div>
+            <div className="text-center space-y-3">
+              <button className="text-sm text-gray-600 hover:text-emerald-600 font-semibold transition-colors">
+                Didn't receive the email?{" "}
+                <span className="underline">Check spam folder</span>
+              </button>
+
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setStep("form");
+                    setSignUpData({
+                      fullName: "",
+                      email: "",
+                      phone: "",
+                      password: "",
+                      confirmPassword: "",
+                    });
+                    setOtp(["", "", "", "", "", "", "", ""]);
+                  }}
+                  className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+                >
+                  ← Back to sign up
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
+      </div>
+    );
+  }
 
-        {/* Right Side - Form */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative"
-        >
-          <motion.div
-            animate={{
-              opacity: [0.02, 0.04, 0.02],
-              scale: [0.98, 1.02, 0.98],
-            }}
-            transition={{ duration: 3, repeat: Infinity }}
-            className="absolute -inset-4 bg-gradient-to-r from-emerald-200/50 to-green-200/50 rounded-3xl blur-2xl"
-          />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center p-3 sm:p-4">
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #10b981;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #059669;
+        }
+      `}</style>
 
-          <div className="relative backdrop-blur-xl bg-white/95 border-2 border-emerald-200 rounded-3xl p-8 md:p-10 shadow-2xl">
-            {/* Mobile Logo */}
-            <div className="lg:hidden text-center mb-8">
-              <h2 className="text-4xl font-black">
-                <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                  WeFootballin'
-                </span>
-              </h2>
-            </div>
-
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-gray-900">
+      {/* Mobile View */}
+      <div className="lg:hidden w-full max-w-md">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-emerald-200/50 p-6 sm:p-8">
+          {!isSignUp ? (
+            <div className="w-full space-y-6">
+              <div className="text-center">
+                <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-6">
                   Welcome Back
-                </h2>
-                <p className="text-gray-600">
+                </h1>
+                <p className="text-gray-600 text-sm sm:text-base">
                   Sign in to continue your journey
                 </p>
               </div>
 
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-red-50 border-2 border-red-300 rounded-xl p-4 text-red-600 text-sm"
-                >
+                <div className="bg-red-50 border border-red-300 text-red-600 px-4 py-3 rounded-xl text-sm">
                   {error}
-                </motion.div>
+                </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Email */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
                     Email Address
                   </label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-emerald-600 transition-colors" />
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="email"
-                      value={formData.email}
+                      value={signInData.email}
                       onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
+                        setSignInData({ ...signInData, email: e.target.value })
                       }
-                      required
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Enter your email"
                       disabled={isLoading}
-                      className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none transition-all disabled:opacity-50 disabled:bg-gray-50"
-                      placeholder="john@example.com"
                     />
                   </div>
                 </div>
 
-                {/* Password */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-700">
-                      Password
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
-                    >
-                      Forgot?
-                    </Link>
-                  </div>
-                  <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-emerald-600 transition-colors" />
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type={showPassword ? "text" : "password"}
-                      value={formData.password}
+                      value={signInData.password}
                       onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
+                        setSignInData({
+                          ...signInData,
+                          password: e.target.value,
+                        })
                       }
-                      required
+                      className="w-full pl-12 pr-14 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Enter your password"
                       disabled={isLoading}
-                      className="w-full pl-12 pr-12 py-4 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none transition-all disabled:opacity-50 disabled:bg-gray-50"
-                      placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600"
                       disabled={isLoading}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors disabled:opacity-50"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -253,43 +357,562 @@ export default function SignInPage() {
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <motion.button
-                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
-                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  type="submit"
+                <button
+                  onClick={handleSignIn}
                   disabled={isLoading}
-                  className="w-full py-4 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-300/50 hover:shadow-emerald-400/60 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Signing in...</span>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Signing In...</span>
                     </>
                   ) : (
                     <>
-                      Sign In
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <span>Sign In</span>
+                      <ArrowRight className="w-5 h-5" />
                     </>
                   )}
-                </motion.button>
-              </form>
+                </button>
+              </div>
 
-              {/* Sign Up Link */}
-              <div className="text-center pt-6 border-t-2 border-gray-200">
-                <p className="text-gray-600">
+              <div className="text-center pt-4">
+                <p className="text-gray-600 text-sm">
                   Don't have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                  <button
+                    onClick={() => {
+                      setIsSignUp(true);
+                      setError("");
+                    }}
+                    className="text-emerald-600 font-bold hover:underline disabled:opacity-50"
+                    disabled={isLoading}
                   >
                     Sign Up
-                  </Link>
+                  </button>
                 </p>
               </div>
             </div>
-          </div>
-        </motion.div>
+          ) : (
+            <div className="w-full space-y-6">
+              <div className="text-center mb-8">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 relative">
+                  <Image
+                    src="/images/wefootballin-logo.png"
+                    alt="WeFootballin Logo"
+                    width={128}
+                    height={128}
+                    className="w-full h-full object-contain"
+                    priority
+                  />
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-2">
+                  Join Us
+                </h1>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Create your WeFootballin' account
+                </p>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-300 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={signUpData.fullName}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          fullName: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Enter your full name"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="email"
+                      value={signUpData.email}
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, email: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Enter your email"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="tel"
+                      value={signUpData.phone}
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, phone: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Enter your phone number"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={signUpData.password}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Min 6 characters"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={signUpData.confirmPassword}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      placeholder="Confirm your password"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleSignUp}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Create Account</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="text-center pt-4">
+                <p className="text-gray-600 text-sm">
+                  Already have an account?{" "}
+                  <button
+                    onClick={() => {
+                      setIsSignUp(false);
+                      setError("");
+                    }}
+                    className="text-emerald-600 font-bold hover:underline disabled:opacity-50"
+                    disabled={isLoading}
+                  >
+                    Sign In
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:block relative w-full max-w-6xl h-screen lg:h-[700px]">
+        <div className="relative w-full h-full bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-emerald-200/50 overflow-hidden">
+          {/* Sign In Form - Visible when isSignUp is FALSE */}
+          <motion.div
+            className="absolute inset-y-0 left-0 w-1/2 flex items-center justify-center px-12 py-8"
+            initial={false}
+            animate={{
+              x: isSignUp ? "-100%" : "0%",
+              opacity: isSignUp ? 0 : 1,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 30,
+            }}
+          >
+            <div className="w-full max-w-md space-y-8">
+              <div className="text-center">
+                <h1 className="text-5xl font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-3">
+                  Welcome Back
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  Sign in to continue your journey
+                </p>
+              </div>
+
+              {error && !isSignUp && (
+                <div className="bg-red-50 border border-red-300 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="email"
+                      value={signInData.email}
+                      onChange={(e) =>
+                        setSignInData({ ...signInData, email: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Enter your email"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={signInData.password}
+                      onChange={(e) =>
+                        setSignInData({
+                          ...signInData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-14 py-4 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Enter your password"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 disabled:opacity-50"
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all mt-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Signing In...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Sign In</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Sign Up Form - Visible when isSignUp is TRUE */}
+          <motion.div
+            className="absolute inset-y-0 right-0 w-1/2 flex items-center justify-center px-12 py-8"
+            initial={false}
+            animate={{
+              x: isSignUp ? "0%" : "100%",
+              opacity: isSignUp ? 1 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 30,
+            }}
+          >
+            <div className="w-full max-w-md space-y-6">
+              <div className="text-center">
+                <h1 className="text-5xl font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-3">
+                  Join Us
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  Create your WeFootballin' account
+                </p>
+              </div>
+
+              {error && isSignUp && (
+                <div className="bg-red-50 border border-red-300 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4 max-h-[440px] overflow-y-auto pr-2 custom-scrollbar">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={signUpData.fullName}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          fullName: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Enter your full name"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="email"
+                      value={signUpData.email}
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, email: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Enter your email"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="tel"
+                      value={signUpData.phone}
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, phone: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Enter your phone number"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={signUpData.password}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Min 6 characters"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={signUpData.confirmPassword}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Confirm your password"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleSignUp}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Create Account</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Sliding Overlay Panel with Logo */}
+          <motion.div
+            className="absolute top-0 w-1/2 h-full bg-gradient-to-br from-emerald-500 to-green-600 shadow-2xl flex flex-col items-center justify-center p-8 z-10 overflow-hidden"
+            initial={false}
+            animate={{
+              x: isSignUp ? "0%" : "100%",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 30,
+            }}
+          >
+            {/* Logo - Always visible on the green panel */}
+            <motion.div
+              className="mb-8 flex-shrink-0"
+              animate={{
+                scale: isSignUp ? 1 : 0.9,
+              }}
+              transition={{
+                duration: 0.5,
+              }}
+            >
+              <div className="relative w-40 h-40 sm:w-48 sm:h-48">
+                <Image
+                  src="/images/wefootballin-logo.png"
+                  alt="WeFootballin Logo"
+                  width={192}
+                  height={192}
+                  className="w-full h-full object-contain drop-shadow-lg"
+                  priority
+                />
+              </div>
+            </motion.div>
+
+            {/* Text Content */}
+            <motion.div
+              className="text-center text-white space-y-6 max-w-md"
+              initial={false}
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                duration: 0.3,
+              }}
+              key={isSignUp ? "signup-panel" : "signin-panel"}
+            >
+              {!isSignUp ? (
+                <>
+                  <h2 className="text-4xl font-black mb-4">New Here?</h2>
+                  <p className="text-lg text-emerald-50 mb-8">
+                    Join WeFootballin' today and start your journey with us!
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsSignUp(true);
+                      setError("");
+                    }}
+                    className="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                    disabled={isLoading}
+                  >
+                    Sign Up Now
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-4xl font-black mb-4">Welcome Back!</h2>
+                  <p className="text-lg text-emerald-50 mb-8">
+                    Sign in to access your account and continue where you left
+                    off.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsSignUp(false);
+                      setError("");
+                    }}
+                    className="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                    disabled={isLoading}
+                  >
+                    Sign In
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

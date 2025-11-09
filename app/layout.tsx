@@ -35,7 +35,7 @@ export default function RootLayout({
 
       // Only redirect if trying to access protected routes without auth
       if (!authenticated && !isPublicRoute && pathname !== "/") {
-        router.push("/signup");
+        router.push("/signin");
       }
     });
 
@@ -61,7 +61,7 @@ export default function RootLayout({
 
       // Only redirect if trying to access protected routes
       if (!authenticated && !isPublicRoute && pathname !== "/") {
-        router.push("/signup");
+        router.push("/signin");
       }
 
       setIsLoading(false);
@@ -72,7 +72,7 @@ export default function RootLayout({
   };
 
   // Public routes - show these always
-  const publicRoutes = ["/signup", "/signin", "/"];
+  const publicRoutes = ["/signup", "/signin"];
   const isPublicRoute = publicRoutes.some((route) =>
     pathname?.startsWith(route)
   );
@@ -93,10 +93,9 @@ export default function RootLayout({
     );
   }
 
-  // Show navbar when authenticated OR on home page
+  // Show navbar and footer when authenticated OR on home page
   const showNavbar = isAuthenticated || pathname === "/";
-  // Show footer on ALL pages
-  const showFooter = true;
+  const showFooter = isAuthenticated || pathname === "/";
 
   return (
     <html lang="en">
