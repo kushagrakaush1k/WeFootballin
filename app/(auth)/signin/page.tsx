@@ -12,28 +12,40 @@ import {
   User,
   Phone,
   ArrowRight,
-  Sparkles,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { signUpUser, signInUser } from "@/lib/auth.client";
+import { signUpUser, signInUser, verifyOTPAndLogin } from "@/lib/auth.client";
+
+interface SignInFormState {
+  email: string;
+  password: string;
+}
+
+interface SignUpFormState {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export default function AuthPage() {
   const router = useRouter();
 
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [step, setStep] = useState("form");
-  const [otp, setOtp] = useState(["", "", "", "", "", "", "", ""]);
+  const [isSignUp, setIsSignUp] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", "", "", ""]);
 
-  const [signInData, setSignInData] = useState({
+  const [signInData, setSignInData] = useState<SignInFormState>({
     email: "",
     password: "",
   });
 
-  const [signUpData, setSignUpData] = useState({
+  const [signUpData, setSignUpData] = useState<SignUpFormState>({
     fullName: "",
     email: "",
     phone: "",
@@ -41,7 +53,7 @@ export default function AuthPage() {
     confirmPassword: "",
   });
 
-  const handleOtpChange = (index, value) => {
+  const handleOtpChange = (index: number, value: string): void => {
     if (value.length > 1) value = value[0];
     if (!/^\d*$/.test(value)) return;
 
@@ -50,19 +62,26 @@ export default function AuthPage() {
     setOtp(newOtp);
 
     if (value && index < 7) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
+      const nextInput = document.getElementById(
+        `otp-${index + 1}`
+      ) as HTMLInputElement;
       nextInput?.focus();
     }
   };
 
-  const handleOtpKeyDown = (index, e) => {
+  const handleOtpKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ): void => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
+      const prevInput = document.getElementById(
+        `otp-${index - 1}`
+      ) as HTMLInputElement;
       prevInput?.focus();
     }
   };
 
-  const handleOtpPaste = (e) => {
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLDivElement>): void => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").slice(0, 8);
     if (!/^\d+$/.test(pastedData)) return;
@@ -71,10 +90,13 @@ export default function AuthPage() {
     setOtp(newOtp);
 
     const lastIndex = Math.min(pastedData.length, 7);
-    document.getElementById(`otp-${lastIndex}`)?.focus();
+    const lastInput = document.getElementById(
+      `otp-${lastIndex}`
+    ) as HTMLInputElement;
+    lastInput?.focus();
   };
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (): Promise<void> => {
     setIsLoading(true);
     setError("");
 
@@ -97,7 +119,6 @@ export default function AuthPage() {
       }
 
       if (user) {
-        // Smooth transition to home
         await new Promise((resolve) => setTimeout(resolve, 500));
         router.push("/");
       }
@@ -108,7 +129,7 @@ export default function AuthPage() {
     }
   };
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (): Promise<void> => {
     setIsLoading(true);
     setError("");
 
@@ -145,9 +166,9 @@ export default function AuthPage() {
       }
 
       if (user) {
-        // Move to OTP verification
         setStep("verify");
       }
+      setIsLoading(false);
     } catch (err) {
       setError("An error occurred. Please try again.");
       console.error(err);
@@ -155,22 +176,38 @@ export default function AuthPage() {
     }
   };
 
-  const handleVerifyOTP = async () => {
+  const handleVerifyOTP = async (): Promise<void> => {
+    const otpCode = otp.join("");
+
+    if (otpCode.length !== 8) {
+      setError("Please enter all 8 digits");
+      return;
+    }
+
+    if (!/^\d+$/.test(otpCode)) {
+      setError("OTP must contain only numbers");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      const otpCode = otp.join("");
+      const { user, error: verifyError } = await verifyOTPAndLogin(
+        signUpData.email,
+        otpCode
+      );
 
-      if (otpCode.length !== 8) {
-        setError("Please enter complete verification code");
+      if (verifyError) {
+        setError(verifyError);
         setIsLoading(false);
         return;
       }
 
-      // Smooth transition to home after email verification
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      router.push("/");
+      if (user) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        router.push("/");
+      }
     } catch (err) {
       setError("OTP verification failed. Please try again.");
       console.error(err);
@@ -179,6 +216,8 @@ export default function AuthPage() {
   };
 
   if (step === "verify") {
+    const isOtpComplete = otp.join("").length === 8;
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center p-4">
         <motion.div
@@ -195,7 +234,7 @@ export default function AuthPage() {
               Verify Your Email
             </h2>
             <p className="text-sm sm:text-base text-gray-600 mb-2">
-              We've sent a verification link to
+              We've sent an 8-digit verification code to
             </p>
             <p className="text-emerald-600 font-bold text-base sm:text-lg break-all px-4">
               {signUpData.email}
@@ -210,33 +249,58 @@ export default function AuthPage() {
 
           <div className="space-y-6">
             <div>
-              <p className="text-sm text-gray-600 text-center mb-4">
-                Click the link in your email to verify your account. Once
-                verified, click the button below to continue.
-              </p>
-              <button
-                onClick={handleVerifyOTP}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 sm:py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              <label className="block text-sm font-bold text-gray-900 mb-4 text-center">
+                Enter 8-Digit Verification Code
+              </label>
+              <div
+                className="flex gap-1 sm:gap-2 justify-center"
+                onPaste={handleOtpPaste}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Redirecting...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-5 h-5" />
-                    <span>I've Verified My Email</span>
-                  </>
-                )}
-              </button>
+                {otp.map((digit: string, index: number) => (
+                  <input
+                    key={index}
+                    id={`otp-${index}`}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    className="w-9 h-11 sm:w-12 sm:h-14 bg-white border-2 border-gray-300 rounded-xl text-gray-900 text-center text-xl sm:text-2xl font-bold focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                    disabled={isLoading}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 text-center mt-4">
+                Check your email inbox for the 8-digit code
+              </p>
             </div>
 
+            <button
+              onClick={handleVerifyOTP}
+              disabled={!isOtpComplete || isLoading}
+              className="w-full flex items-center justify-center gap-3 px-6 py-3 sm:py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Verifying...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Verify Code</span>
+                </>
+              )}
+            </button>
+
             <div className="text-center space-y-3">
-              <button className="text-sm text-gray-600 hover:text-emerald-600 font-semibold transition-colors">
-                Didn't receive the email?{" "}
-                <span className="underline">Check spam folder</span>
+              <button
+                className="text-sm text-gray-600 hover:text-emerald-600 font-semibold transition-colors disabled:opacity-50"
+                disabled={isLoading}
+              >
+                Didn't receive the code?{" "}
+                <span className="underline">Resend</span>
               </button>
 
               <div className="pt-4 border-t border-gray-200">
@@ -251,8 +315,10 @@ export default function AuthPage() {
                       confirmPassword: "",
                     });
                     setOtp(["", "", "", "", "", "", "", ""]);
+                    setError("");
                   }}
-                  className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium disabled:opacity-50"
+                  disabled={isLoading}
                 >
                   ← Back to sign up
                 </button>
@@ -316,7 +382,7 @@ export default function AuthPage() {
                       onChange={(e) =>
                         setSignInData({ ...signInData, email: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Enter your email"
                       disabled={isLoading}
                     />
@@ -338,14 +404,14 @@ export default function AuthPage() {
                           password: e.target.value,
                         })
                       }
-                      className="w-full pl-12 pr-14 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-14 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Enter your password"
                       disabled={isLoading}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 disabled:opacity-50"
                       disabled={isLoading}
                     >
                       {showPassword ? (
@@ -435,7 +501,7 @@ export default function AuthPage() {
                           fullName: e.target.value,
                         })
                       }
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Enter your full name"
                       disabled={isLoading}
                     />
@@ -454,7 +520,7 @@ export default function AuthPage() {
                       onChange={(e) =>
                         setSignUpData({ ...signUpData, email: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Enter your email"
                       disabled={isLoading}
                     />
@@ -473,7 +539,7 @@ export default function AuthPage() {
                       onChange={(e) =>
                         setSignUpData({ ...signUpData, phone: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Enter your phone number"
                       disabled={isLoading}
                     />
@@ -495,7 +561,7 @@ export default function AuthPage() {
                           password: e.target.value,
                         })
                       }
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Min 6 characters"
                       disabled={isLoading}
                     />
@@ -517,7 +583,7 @@ export default function AuthPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Confirm your password"
                       disabled={isLoading}
                     />
@@ -566,7 +632,7 @@ export default function AuthPage() {
       {/* Desktop View */}
       <div className="hidden lg:block relative w-full max-w-6xl h-screen lg:h-[700px]">
         <div className="relative w-full h-full bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-emerald-200/50 overflow-hidden">
-          {/* Sign In Form - Visible when isSignUp is FALSE */}
+          {/* Sign In Form */}
           <motion.div
             className="absolute inset-y-0 left-0 w-1/2 flex items-center justify-center px-12 py-8"
             initial={false}
@@ -653,7 +719,7 @@ export default function AuthPage() {
                 <button
                   onClick={handleSignIn}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all mt-2"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-2"
                 >
                   {isLoading ? (
                     <>
@@ -671,7 +737,7 @@ export default function AuthPage() {
             </div>
           </motion.div>
 
-          {/* Sign Up Form - Visible when isSignUp is TRUE */}
+          {/* Sign Up Form */}
           <motion.div
             className="absolute inset-y-0 right-0 w-1/2 flex items-center justify-center px-12 py-8"
             initial={false}
@@ -827,7 +893,7 @@ export default function AuthPage() {
             </div>
           </motion.div>
 
-          {/* Sliding Overlay Panel with Logo */}
+          {/* Sliding Panel */}
           <motion.div
             className="absolute top-0 w-1/2 h-full bg-gradient-to-br from-emerald-500 to-green-600 shadow-2xl flex flex-col items-center justify-center p-8 z-10 overflow-hidden"
             initial={false}
@@ -840,7 +906,6 @@ export default function AuthPage() {
               damping: 30,
             }}
           >
-            {/* Logo - Always visible on the green panel */}
             <motion.div
               className="mb-8 flex-shrink-0"
               animate={{
@@ -862,7 +927,6 @@ export default function AuthPage() {
               </div>
             </motion.div>
 
-            {/* Text Content */}
             <motion.div
               className="text-center text-white space-y-6 max-w-md"
               initial={false}
@@ -885,7 +949,7 @@ export default function AuthPage() {
                       setIsSignUp(true);
                       setError("");
                     }}
-                    className="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                    className="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isLoading}
                   >
                     Sign Up Now
@@ -903,7 +967,7 @@ export default function AuthPage() {
                       setIsSignUp(false);
                       setError("");
                     }}
-                    className="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                    className="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isLoading}
                   >
                     Sign In

@@ -21,8 +21,7 @@ export async function signUpUser(data: SignUpData): Promise<AuthResponse> {
     }
 
     if (authData.user) {
-      // Wait a moment for auth to settle
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const { error: profileError } = await supabase
         .from('profiles')
@@ -68,6 +67,33 @@ export async function signInUser(data: SignInData): Promise<AuthResponse> {
   } catch (error) {
     console.error('Sign in error:', error);
     return { user: null, error: 'An error occurred during sign in' };
+  }
+}
+
+export async function verifyOTPAndLogin(email: string, otp: string): Promise<AuthResponse> {
+  try {
+    const supabase = createClient();
+
+    // Verify OTP with Supabase
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      email: email,
+      token: otp,
+      type: 'signup',
+    });
+
+    if (verifyError) {
+      return { user: null, error: verifyError.message };
+    }
+
+    if (data.user) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return { user: data.user, error: null };
+    }
+
+    return { user: null, error: 'OTP verification failed' };
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    return { user: null, error: 'An error occurred during OTP verification' };
   }
 }
 
