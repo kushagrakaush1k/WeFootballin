@@ -15,7 +15,7 @@ import {
   Trophy,
   LayoutDashboard,
   LogOut,
-  User as UserIcon,
+  User,
   ChevronDown,
   Sparkles,
   Zap,
@@ -38,12 +38,11 @@ export function Navbar() {
   const supabase = createClient();
 
   const { scrollY } = useScroll();
-  const navOpacity = useTransform(scrollY, [0, 100], [0.95, 1]);
+  const navOpacity = useTransform(scrollY, [0, 100], [0.98, 1]);
 
   useEffect(() => {
     getUser();
 
-    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -105,18 +104,17 @@ export function Navbar() {
         style={{ opacity: navOpacity }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 m-0 ${
+        transition={{ type: "spring", stiffness: 120, damping: 25 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 m-0 ${
           isScrolled
-            ? "bg-black/95 backdrop-blur-3xl border-b border-emerald-500/20 shadow-2xl shadow-emerald-500/10"
-            : "bg-black/80 backdrop-blur-2xl border-b border-white/5"
+            ? "bg-white/85 backdrop-blur-2xl border-b-2 border-emerald-200/50 shadow-[0_8px_32px_rgba(16,185,129,0.08)]"
+            : "bg-white/70 backdrop-blur-xl border-b border-gray-200/60"
         }`}
       >
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
             <Link
               href="/"
               className="flex items-center gap-3 group relative z-10"
@@ -124,11 +122,11 @@ export function Navbar() {
               <motion.div
                 whileHover={{ scale: 1.08, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
                 className="relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl blur-xl opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
-                <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 via-green-500 to-emerald-600 flex items-center justify-center shadow-2xl shadow-emerald-500/50 group-hover:shadow-emerald-500/70 transition-all duration-300 border border-emerald-400/30 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-green-500 rounded-2xl blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-300" />
+                <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 via-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/50 transition-all duration-300 border-2 border-white/50 overflow-hidden">
                   <Image
                     src="/images/logofootballin.jpg"
                     alt="WeFootballin Logo"
@@ -160,19 +158,17 @@ export function Navbar() {
 
               <div className="flex flex-col">
                 <motion.span
-                  className="text-2xl font-black bg-gradient-to-r from-emerald-300 via-green-400 to-emerald-500 bg-clip-text text-transparent drop-shadow-lg"
+                  className="text-2xl font-black bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 bg-clip-text text-transparent"
                   whileHover={{ scale: 1.02 }}
-                  style={{ textShadow: "0 0 40px rgba(16, 185, 129, 0.3)" }}
                 >
                   WeFootballin'
                 </motion.span>
-                <span className="text-[10px] font-bold text-emerald-400/70 tracking-widest uppercase -mt-1 drop-shadow">
+                <span className="text-[10px] font-bold text-emerald-500/70 tracking-widest uppercase -mt-1">
                   Elite Platform
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-2">
               {navLinks.map((link, index) => {
                 const Icon = link.icon;
@@ -191,12 +187,12 @@ export function Navbar() {
                       <motion.div
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`relative px-5 py-2.5 rounded-xl font-bold transition-all duration-300 ${
+                        className={`relative px-6 py-3 rounded-xl font-bold transition-all duration-300 ${
                           link.highlight
-                            ? "bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 text-white shadow-xl shadow-emerald-500/40 border border-emerald-400/50"
+                            ? "bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 border-2 border-white/30"
                             : activeLink === link.href
-                            ? "bg-white/10 text-white backdrop-blur-sm border border-white/20"
-                            : "text-gray-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10"
+                            ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-200"
+                            : "text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/50 border-2 border-transparent hover:border-emerald-200/50"
                         }`}
                       >
                         <div className="flex items-center gap-2 relative z-10">
@@ -209,13 +205,12 @@ export function Navbar() {
                 );
               })}
 
-              <div className="relative w-px h-10 mx-2">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-500/30 to-transparent" />
+              <div className="relative w-[2px] h-10 mx-2">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-400/30 to-transparent" />
               </div>
 
               {user ? (
                 <div className="flex items-center gap-3">
-                  {/* Admin Button */}
                   {user.role === "admin" && (
                     <Link href="/admin">
                       <motion.div
@@ -223,8 +218,8 @@ export function Navbar() {
                         whileTap={{ scale: 0.95 }}
                         className="relative group"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-xl blur-lg opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
-                        <div className="relative flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-400/50 text-purple-200 rounded-xl font-bold backdrop-blur-sm hover:border-purple-400/80 transition-all duration-300 shadow-lg shadow-purple-500/20">
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+                        <div className="relative flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 text-purple-700 rounded-xl font-bold hover:border-purple-300 transition-all duration-300 shadow-sm shadow-purple-500/10">
                           <LayoutDashboard className="w-4 h-4" />
                           <span>Admin</span>
                         </div>
@@ -232,34 +227,32 @@ export function Navbar() {
                     </Link>
                   )}
 
-                  {/* User Menu */}
                   <div className="relative">
                     <motion.button
                       whileHover={{ scale: 1.03, y: -2 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-md border border-white/20 rounded-xl hover:border-emerald-500/60 transition-all duration-300 group shadow-lg shadow-black/20"
+                      className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-xl hover:border-emerald-300 transition-all duration-300 group shadow-sm shadow-emerald-500/10"
                     >
                       <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
-                        <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/40 border border-emerald-300/30">
-                          <UserIcon
-                            className="w-4 h-4 text-white drop-shadow"
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full blur-md opacity-30 group-hover:opacity-50 transition-opacity" />
+                        <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-md shadow-emerald-500/30 border-2 border-white">
+                          <User
+                            className="w-4 h-4 text-white"
                             strokeWidth={2.5}
                           />
                         </div>
                       </div>
-                      <span className="text-sm font-bold text-white max-w-[120px] truncate drop-shadow">
+                      <span className="text-sm font-bold text-gray-800 max-w-[120px] truncate">
                         {user.name}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 text-gray-400 transition-all duration-300 ${
-                          showUserMenu ? "rotate-180 text-emerald-400" : ""
+                        className={`w-4 h-4 text-gray-600 transition-all duration-300 ${
+                          showUserMenu ? "rotate-180 text-emerald-600" : ""
                         }`}
                       />
                     </motion.button>
 
-                    {/* Dropdown */}
                     <AnimatePresence>
                       {showUserMenu && (
                         <>
@@ -271,18 +264,18 @@ export function Navbar() {
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute right-0 top-full mt-3 w-64 bg-black/97 backdrop-blur-2xl border border-emerald-500/20 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden z-50"
+                            className="absolute right-0 top-full mt-3 w-64 bg-white/95 backdrop-blur-2xl border-2 border-emerald-200 rounded-2xl shadow-2xl shadow-emerald-500/20 overflow-hidden z-50"
                           >
-                            <div className="p-4 border-b border-white/10">
+                            <div className="p-4 border-b border-emerald-100 bg-gradient-to-br from-emerald-50 to-green-50">
                               <div className="flex items-center gap-3">
-                                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg">
-                                  <UserIcon className="w-6 h-6 text-white" />
+                                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg border-2 border-white">
+                                  <User className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                  <p className="font-bold text-white text-sm">
+                                  <p className="font-bold text-gray-900 text-sm">
                                     {user.name}
                                   </p>
-                                  <p className="text-xs text-gray-400">
+                                  <p className="text-xs text-gray-600">
                                     {user.email}
                                   </p>
                                 </div>
@@ -294,7 +287,7 @@ export function Navbar() {
                                 whileHover={{ scale: 1.02, x: 4 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={handleSignOut}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/15 hover:text-red-300 transition-all duration-200 font-semibold"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 font-semibold"
                               >
                                 <LogOut className="w-4 h-4" />
                                 <span>Sign Out</span>
@@ -312,7 +305,7 @@ export function Navbar() {
                     <motion.button
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-6 py-2.5 text-white font-bold hover:bg-white/10 rounded-xl transition-all duration-300 border border-white/10"
+                      className="px-6 py-3 text-gray-700 font-bold hover:bg-emerald-50 rounded-xl transition-all duration-300 border-2 border-transparent hover:border-emerald-200"
                     >
                       Sign In
                     </motion.button>
@@ -321,7 +314,7 @@ export function Navbar() {
                     <motion.button
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-xl"
+                      className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 border-2 border-white/30 transition-all"
                     >
                       Sign Up
                     </motion.button>
@@ -330,11 +323,10 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden relative p-3 text-white hover:bg-white/10 rounded-xl transition-all z-10"
+              className="md:hidden relative p-3 text-gray-700 hover:bg-emerald-50 rounded-xl transition-all z-10 border-2 border-transparent hover:border-emerald-200"
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -346,7 +338,6 @@ export function Navbar() {
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -355,21 +346,24 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 md:hidden"
+              className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 md:hidden"
             />
             <motion.div
               initial={{ opacity: 0, x: "100%" }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
-              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-black/98 backdrop-blur-3xl border-l border-emerald-500/20 z-50 md:hidden overflow-y-auto"
+              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white/95 backdrop-blur-2xl border-l-2 border-emerald-200 z-50 md:hidden overflow-y-auto shadow-2xl"
             >
               <div className="p-6 space-y-6">
-                <div className="flex items-center justify-between pb-6 border-b border-emerald-500/20">
-                  <span className="text-lg font-black bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
+                <div className="flex items-center justify-between pb-6 border-b border-emerald-200">
+                  <span className="text-lg font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                     WeFootballin'
                   </span>
-                  <button onClick={() => setIsOpen(false)} className="p-2">
-                    <X className="w-5 h-5 text-white" />
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-2 hover:bg-emerald-50 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-700" />
                   </button>
                 </div>
 
@@ -379,10 +373,10 @@ export function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-4 rounded-xl font-bold ${
+                      className={`flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all ${
                         link.highlight
-                          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white"
-                          : "text-gray-300 hover:bg-white/10"
+                          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg"
+                          : "text-gray-700 hover:bg-emerald-50 border-2 border-transparent hover:border-emerald-200"
                       }`}
                     >
                       {link.icon && <link.icon className="w-5 h-5" />}
@@ -397,27 +391,27 @@ export function Navbar() {
                       <Link
                         href="/admin"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-4 bg-purple-500/20 text-purple-300 rounded-xl font-bold"
+                        className="flex items-center gap-3 px-4 py-4 bg-purple-50 text-purple-700 rounded-xl font-bold border-2 border-purple-200"
                       >
                         <LayoutDashboard className="w-5 h-5" />
                         Admin Panel
                       </Link>
                     )}
 
-                    <div className="pt-6 border-t border-emerald-500/20">
-                      <div className="flex items-center gap-3 px-4 py-4 bg-white/5 rounded-xl mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
-                          <UserIcon className="w-6 h-6 text-white" />
+                    <div className="pt-6 border-t border-emerald-200">
+                      <div className="flex items-center gap-3 px-4 py-4 bg-emerald-50 rounded-xl mb-4 border-2 border-emerald-200">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center border-2 border-white shadow-lg">
+                          <User className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <p className="font-bold text-white">{user.name}</p>
-                          <p className="text-sm text-gray-400">{user.email}</p>
+                          <p className="font-bold text-gray-900">{user.name}</p>
+                          <p className="text-sm text-gray-600">{user.email}</p>
                         </div>
                       </div>
 
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-red-500/20 text-red-400 rounded-xl font-bold"
+                        className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-red-50 text-red-600 rounded-xl font-bold border-2 border-red-200 hover:bg-red-100 transition-colors"
                       >
                         <LogOut className="w-5 h-5" />
                         Sign Out
@@ -425,18 +419,18 @@ export function Navbar() {
                     </div>
                   </>
                 ) : (
-                  <div className="pt-6 border-t border-emerald-500/20 space-y-3">
+                  <div className="pt-6 border-t border-emerald-200 space-y-3">
                     <Link
                       href="/signin"
                       onClick={() => setIsOpen(false)}
-                      className="block px-4 py-4 text-center text-white font-bold bg-white/5 rounded-xl"
+                      className="block px-4 py-4 text-center text-gray-700 font-bold bg-emerald-50 rounded-xl border-2 border-emerald-200 hover:bg-emerald-100 transition-colors"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/signup"
                       onClick={() => setIsOpen(false)}
-                      className="block px-4 py-4 text-center bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl"
+                      className="block px-4 py-4 text-center bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg"
                     >
                       Sign Up
                     </Link>

@@ -174,10 +174,10 @@ export default function RegisterTeamPage() {
   const progress = (step / 3) * 100;
 
   return (
-    <div className="min-h-screen bg-black pt-24 pb-16">
+    <div className="min-h-screen bg-white pt-24 pb-16">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-400/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,41 +186,41 @@ export default function RegisterTeamPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6">
-            <Trophy className="w-5 h-5 text-emerald-400" />
-            <span className="text-sm font-bold text-emerald-400">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 border-2 border-emerald-300 rounded-full mb-6 shadow-sm">
+            <Trophy className="w-5 h-5 text-emerald-600" />
+            <span className="text-sm font-bold text-emerald-700">
               ROCK8 LEAGUE REGISTRATION
             </span>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black mb-4">
-            <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
               Register Your Team
             </span>
           </h1>
-          <p className="text-lg text-gray-400">
+          <p className="text-lg text-gray-600">
             Join the most competitive football league
           </p>
         </motion.div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
         {step <= 3 && (
           <div className="mb-8">
             <div className="flex justify-between mb-3">
-              <span className="text-sm font-semibold text-gray-300">
+              <span className="text-sm font-semibold text-gray-700">
                 Step {step} of 3
               </span>
-              <span className="text-sm font-semibold text-emerald-400">
+              <span className="text-sm font-semibold text-emerald-600">
                 {Math.round(progress)}%
               </span>
             </div>
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-2 bg-emerald-100 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-emerald-500 to-green-500"
                 initial={{ width: 0 }}
@@ -234,7 +234,7 @@ export default function RegisterTeamPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10"
+          className="bg-white/90 backdrop-blur-xl border-2 border-emerald-200 rounded-3xl p-8 md:p-10 shadow-2xl"
         >
           <AnimatePresence mode="wait">
             {step === 1 && (
@@ -246,28 +246,28 @@ export default function RegisterTeamPage() {
                 className="space-y-6"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-emerald-400" />
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">
+                    <h2 className="text-2xl font-bold text-gray-900">
                       Team Details
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-gray-600">
                       Choose your team name and group
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Team Name *
                   </label>
                   <input
                     type="text"
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
-                    className="w-full px-6 py-4 bg-black/40 border border-white/20 rounded-xl text-white text-lg placeholder:text-gray-500 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                    className="w-full px-6 py-4 bg-white border-2 border-gray-200 rounded-xl text-gray-900 text-lg placeholder:text-gray-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 focus:outline-none transition-all"
                     placeholder="e.g., Thunder Strikers"
                     maxLength={50}
                   />
@@ -275,7 +275,7 @@ export default function RegisterTeamPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Select League Group *
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -286,8 +286,8 @@ export default function RegisterTeamPage() {
                         onClick={() => setLeagueGroup(group)}
                         className={`px-6 py-4 rounded-xl font-bold text-lg transition-all ${
                           leagueGroup === group
-                            ? "bg-emerald-500 text-white shadow-lg"
-                            : "bg-black/40 border border-white/20 text-gray-400 hover:border-emerald-500/50"
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-300/50"
+                            : "bg-white border-2 border-emerald-200 text-gray-700 hover:border-emerald-400 shadow-sm"
                         }`}
                       >
                         Group {group}
@@ -308,14 +308,14 @@ export default function RegisterTeamPage() {
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-emerald-400" />
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">
+                      <h2 className="text-2xl font-bold text-gray-900">
                         Squad Details
                       </h2>
-                      <p className="text-gray-400">
+                      <p className="text-gray-600">
                         {players.length} players (min 8, max 15)
                       </p>
                     </div>
@@ -324,7 +324,7 @@ export default function RegisterTeamPage() {
                   {players.length < 15 && (
                     <button
                       onClick={addPlayer}
-                      className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 rounded-lg font-semibold"
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-100 border-2 border-emerald-300 text-emerald-700 rounded-lg font-semibold shadow-sm hover:bg-emerald-200 transition-colors"
                     >
                       <UserPlus className="w-4 h-4" />
                       Add
@@ -336,11 +336,11 @@ export default function RegisterTeamPage() {
                   {players.map((player, index) => (
                     <div
                       key={index}
-                      className="bg-black/40 border border-white/10 rounded-xl p-4 space-y-3"
+                      className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 space-y-3"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold">
                             {index + 1}
                           </div>
                           <label className="flex items-center gap-2 cursor-pointer">
@@ -349,9 +349,9 @@ export default function RegisterTeamPage() {
                               name="captain"
                               checked={captainIndex === index}
                               onChange={() => setCaptainIndex(index)}
-                              className="w-4 h-4 accent-emerald-500"
+                              className="w-4 h-4 accent-emerald-600"
                             />
-                            <span className="text-sm text-gray-400">
+                            <span className="text-sm text-gray-700 font-medium">
                               Captain
                             </span>
                           </label>
@@ -360,7 +360,7 @@ export default function RegisterTeamPage() {
                         {players.length > 1 && (
                           <button
                             onClick={() => removePlayer(index)}
-                            className="text-red-400 hover:text-red-300 text-sm font-semibold"
+                            className="text-red-600 hover:text-red-700 text-sm font-semibold"
                           >
                             Remove
                           </button>
@@ -375,7 +375,7 @@ export default function RegisterTeamPage() {
                             updatePlayer(index, "name", e.target.value)
                           }
                           placeholder="Player Name *"
-                          className="px-4 py-2 bg-black/60 border border-white/20 rounded-lg text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:outline-none"
+                          className="px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                         />
                         <input
                           type="tel"
@@ -384,7 +384,7 @@ export default function RegisterTeamPage() {
                             updatePlayer(index, "phone", e.target.value)
                           }
                           placeholder="Phone Number *"
-                          className="px-4 py-2 bg-black/60 border border-white/20 rounded-lg text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:outline-none"
+                          className="px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                         />
                         <input
                           type="text"
@@ -393,7 +393,7 @@ export default function RegisterTeamPage() {
                             updatePlayer(index, "instagram", e.target.value)
                           }
                           placeholder="Instagram (optional)"
-                          className="px-4 py-2 bg-black/60 border border-white/20 rounded-lg text-white placeholder:text-gray-500 focus:border-emerald-500/50 focus:outline-none"
+                          className="px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                         />
                       </div>
                     </div>
@@ -411,56 +411,56 @@ export default function RegisterTeamPage() {
                 className="space-y-6"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                    <Upload className="w-6 h-6 text-emerald-400" />
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">
+                    <h2 className="text-2xl font-bold text-gray-900">
                       Payment Proof
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-gray-600">
                       Upload your payment screenshot
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/30 rounded-xl p-6 mb-6">
-                  <h3 className="text-lg font-bold text-white mb-3">
+                <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">
                     Payment Details
                   </h3>
-                  <div className="space-y-2 text-gray-300">
+                  <div className="space-y-2 text-gray-700">
                     <p>
-                      <strong className="text-emerald-400">Amount:</strong>{" "}
+                      <strong className="text-emerald-700">Amount:</strong>{" "}
                       ₹5,000
                     </p>
                     <p>
-                      <strong className="text-emerald-400">UPI ID:</strong>{" "}
+                      <strong className="text-emerald-700">UPI ID:</strong>{" "}
                       wefootballin@paytm
                     </p>
                   </div>
                 </div>
 
                 <label className="block">
-                  <div className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-500/50 transition-all">
+                  <div className="border-2 border-dashed border-emerald-300 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition-all">
                     {paymentScreenshot ? (
                       <div className="space-y-3">
-                        <div className="flex items-center justify-center gap-3 text-emerald-400">
+                        <div className="flex items-center justify-center gap-3 text-emerald-600">
                           <CheckCircle2 className="w-6 h-6" />
                           <span className="font-semibold">
                             {paymentScreenshot.name}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {(paymentScreenshot.size / 1024).toFixed(2)} KB
                         </p>
                       </div>
                     ) : (
                       <>
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-white font-semibold mb-1">
+                        <p className="text-gray-900 font-semibold mb-1">
                           Upload Payment Screenshot
                         </p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-600">
                           Click to browse files (Max 5MB)
                         </p>
                       </>
@@ -483,14 +483,14 @@ export default function RegisterTeamPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-12"
               >
-                <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+                <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600" />
                 </div>
 
-                <h2 className="text-3xl font-black text-white mb-4">
+                <h2 className="text-3xl font-black text-gray-900 mb-4">
                   Registration Submitted!
                 </h2>
-                <p className="text-gray-400 mb-8">
+                <p className="text-gray-600 mb-8">
                   Your team registration is under review. You'll receive
                   confirmation once approved.
                 </p>
@@ -498,14 +498,14 @@ export default function RegisterTeamPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <a
                     href="/leaderboard"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl shadow-lg transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-300/50 hover:shadow-emerald-400/60 transition-all"
                   >
                     View Leaderboard
                     <ArrowRight className="w-5 h-5" />
                   </a>
                   <a
                     href="/"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold rounded-xl transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-emerald-200 text-gray-900 font-semibold rounded-xl hover:bg-emerald-50 transition-all shadow-sm"
                   >
                     Back to Home
                   </a>
@@ -515,12 +515,12 @@ export default function RegisterTeamPage() {
           </AnimatePresence>
 
           {step <= 3 && (
-            <div className="flex gap-4 mt-8 pt-6 border-t border-white/10">
+            <div className="flex gap-4 mt-8 pt-6 border-t-2 border-gray-200">
               {step > 1 && (
                 <button
                   onClick={() => setStep(step - 1)}
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 px-6 py-3 bg-white/10 border border-white/20 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 font-semibold rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 shadow-sm"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   Back
@@ -532,7 +532,7 @@ export default function RegisterTeamPage() {
                   step === 3 ? handleSubmit() : setStep(step + 1)
                 }
                 disabled={!canProceed() || isSubmitting}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-300/50 hover:shadow-emerald-400/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>

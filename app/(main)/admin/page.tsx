@@ -33,6 +33,7 @@ interface Team {
   goals_for: number;
   goals_against: number;
   points: number;
+  goal_difference: number;
   created_at: string;
 }
 
@@ -240,20 +241,20 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading admin dashboard...</p>
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black pt-24 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-white via-purple-50 to-pink-50 pt-24 pb-16">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-300/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -263,12 +264,12 @@ export default function AdminDashboard() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-2">
-            <Shield className="w-8 h-8 text-purple-400" />
-            <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            <Shield className="w-8 h-8 text-purple-600" />
+            <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Admin Dashboard
             </h1>
           </div>
-          <p className="text-gray-400">
+          <p className="text-gray-600">
             Manage teams, players, and league operations
           </p>
         </motion.div>
@@ -280,24 +281,32 @@ export default function AdminDashboard() {
               value: stats.totalTeams,
               icon: Users,
               color: "emerald",
+              bg: "bg-emerald-100",
+              text: "text-emerald-600",
             },
             {
               label: "Pending Approvals",
               value: stats.pendingApprovals,
               icon: Clock,
               color: "yellow",
+              bg: "bg-yellow-100",
+              text: "text-yellow-600",
             },
             {
               label: "Total Players",
               value: stats.totalPlayers,
               icon: UserCheck,
               color: "blue",
+              bg: "bg-blue-100",
+              text: "text-blue-600",
             },
             {
               label: "Total Matches",
               value: stats.totalMatches,
               icon: Trophy,
               color: "purple",
+              bg: "bg-purple-100",
+              text: "text-purple-600",
             },
           ].map((stat, i) => (
             <motion.div
@@ -305,20 +314,20 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
+              className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg"
             >
               <div className="flex items-center justify-between mb-4">
                 <div
-                  className={`w-12 h-12 rounded-xl bg-${stat.color}-500/20 flex items-center justify-center`}
+                  className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}
                 >
-                  <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
+                  <stat.icon className={`w-6 h-6 ${stat.text}`} />
                 </div>
-                <TrendingUp className="w-5 h-5 text-gray-500" />
+                <TrendingUp className="w-5 h-5 text-gray-400" />
               </div>
-              <div className="text-3xl font-bold text-white mb-1">
+              <div className="text-3xl font-bold text-gray-900 mb-1">
                 {stat.value}
               </div>
-              <div className="text-sm text-gray-400">{stat.label}</div>
+              <div className="text-sm text-gray-600">{stat.label}</div>
             </motion.div>
           ))}
         </div>
@@ -338,10 +347,10 @@ export default function AdminDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as Tab)}
-              className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+              className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap shadow-sm ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                  : "bg-white/5 text-gray-400 hover:bg-white/10"
+                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-purple-50 border-2 border-gray-200"
               }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -358,13 +367,13 @@ export default function AdminDashboard() {
         {(activeTab === "teams" || activeTab === "players") && (
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search teams..."
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500/50 focus:outline-none"
+                className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100"
               />
             </div>
 
@@ -372,7 +381,7 @@ export default function AdminDashboard() {
               <select
                 value={selectedGroup}
                 onChange={(e) => setSelectedGroup(e.target.value)}
-                className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-purple-500/50 focus:outline-none"
+                className="px-6 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100"
               >
                 <option value="all">All Groups</option>
                 <option value="A">Group A</option>
@@ -385,40 +394,40 @@ export default function AdminDashboard() {
 
         {activeTab === "teams" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6">
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-emerald-400" />
+                <div className="w-10 h-10 rounded-lg bg-emerald-200 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-emerald-700" />
                 </div>
-                <div className="text-3xl font-bold text-white">
+                <div className="text-3xl font-bold text-gray-900">
                   {groupStats.totalTeams}
                 </div>
               </div>
-              <div className="text-sm text-gray-400">Total Teams</div>
+              <div className="text-sm text-gray-600">Total Teams</div>
             </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 rounded-lg bg-blue-200 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-blue-700" />
                 </div>
-                <div className="text-3xl font-bold text-white">
+                <div className="text-3xl font-bold text-gray-900">
                   {groupStats.totalMatches}
                 </div>
               </div>
-              <div className="text-sm text-gray-400">Matches Played</div>
+              <div className="text-sm text-gray-600">Matches Played</div>
             </div>
 
-            <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6">
+            <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                  <Trophy className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-lg bg-purple-200 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-purple-700" />
                 </div>
-                <div className="text-3xl font-bold text-white">
+                <div className="text-3xl font-bold text-gray-900">
                   {groupStats.totalGoals}
                 </div>
               </div>
-              <div className="text-sm text-gray-400">Total Goals</div>
+              <div className="text-sm text-gray-600">Total Goals</div>
             </div>
           </div>
         )}
@@ -432,12 +441,12 @@ export default function AdminDashboard() {
               exit={{ opacity: 0 }}
               className="space-y-6"
             >
-              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-8 text-center">
-                <Trophy className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-white mb-2">
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 text-center shadow-lg">
+                <Trophy className="w-16 h-16 text-purple-600 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   Welcome to Admin Panel
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-gray-600">
                   Manage all aspects of the ROCK8 League from here
                 </p>
               </div>
@@ -451,41 +460,41 @@ export default function AdminDashboard() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden shadow-lg">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-emerald-900/30 border-b border-emerald-500/20">
+                    <thead className="bg-emerald-50 border-b-2 border-emerald-200">
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-left text-sm font-bold text-emerald-700 uppercase">
                           Rank
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-left text-sm font-bold text-emerald-700 uppercase">
                           Team
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-700 uppercase">
                           MP
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-700 uppercase">
                           W
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-700 uppercase">
                           D
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-700 uppercase">
                           L
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-700 uppercase">
                           GD
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-center text-sm font-bold text-emerald-700 uppercase">
                           PTS
                         </th>
-                        <th className="px-6 py-4 text-right text-sm font-bold text-emerald-300 uppercase">
+                        <th className="px-6 py-4 text-right text-sm font-bold text-emerald-700 uppercase">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-gray-100">
                       {filteredTeams.map((team, index) => {
                         const goalDifference =
                           team.goals_for - team.goals_against;
@@ -494,23 +503,23 @@ export default function AdminDashboard() {
                         return (
                           <tr
                             key={team.id}
-                            className={`hover:bg-white/5 transition-colors ${
-                              isTopTeam ? "bg-yellow-500/5" : ""
+                            className={`hover:bg-emerald-50/50 transition-colors ${
+                              isTopTeam ? "bg-yellow-50/50" : ""
                             }`}
                           >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
                                 {isTopTeam && (
-                                  <Trophy className="w-5 h-5 text-yellow-500" />
+                                  <Trophy className="w-5 h-5 text-yellow-600" />
                                 )}
-                                <span className="font-bold text-white">
+                                <span className="font-bold text-gray-900">
                                   {index + 1}
                                 </span>
                               </div>
                             </td>
                             <td className="px-6 py-4">
                               <div>
-                                <div className="font-bold text-white">
+                                <div className="font-bold text-gray-900">
                                   {team.team_name}
                                 </div>
                                 <div className="text-xs text-gray-500">
@@ -518,26 +527,26 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-center text-gray-300 font-medium">
+                            <td className="px-6 py-4 text-center text-gray-700 font-medium">
                               {team.matches_played}
                             </td>
-                            <td className="px-6 py-4 text-center text-green-400 font-bold">
+                            <td className="px-6 py-4 text-center text-green-600 font-bold">
                               {team.wins}
                             </td>
-                            <td className="px-6 py-4 text-center text-yellow-400 font-bold">
+                            <td className="px-6 py-4 text-center text-yellow-600 font-bold">
                               {team.draws}
                             </td>
-                            <td className="px-6 py-4 text-center text-red-400 font-bold">
+                            <td className="px-6 py-4 text-center text-red-600 font-bold">
                               {team.losses}
                             </td>
                             <td className="px-6 py-4 text-center">
                               <span
                                 className={`font-bold ${
                                   goalDifference > 0
-                                    ? "text-green-400"
+                                    ? "text-green-600"
                                     : goalDifference < 0
-                                    ? "text-red-400"
-                                    : "text-gray-400"
+                                    ? "text-red-600"
+                                    : "text-gray-600"
                                 }`}
                               >
                                 {goalDifference > 0 ? "+" : ""}
@@ -545,7 +554,7 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <span className="inline-flex items-center justify-center min-w-[3rem] px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">
+                              <span className="inline-flex items-center justify-center min-w-[3rem] px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold border-2 border-emerald-300">
                                 {team.points}
                               </span>
                             </td>
@@ -556,21 +565,21 @@ export default function AdminDashboard() {
                                     setSelectedTeam(team);
                                     setShowEditModal(true);
                                   }}
-                                  className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors group"
+                                  className="p-2 hover:bg-blue-100 rounded-lg transition-colors group"
                                   title="Edit Team"
                                   disabled={isDeleting}
                                 >
-                                  <Edit2 className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
+                                  <Edit2 className="w-4 h-4 text-blue-600 group-hover:text-blue-700" />
                                 </button>
                                 <button
                                   onClick={() =>
                                     deleteTeam(team.id, team.team_name)
                                   }
-                                  className="p-2 hover:bg-red-500/20 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="p-2 hover:bg-red-100 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Delete Team"
                                   disabled={isDeleting}
                                 >
-                                  <Trash2 className="w-4 h-4 text-red-400 group-hover:text-red-300" />
+                                  <Trash2 className="w-4 h-4 text-red-600 group-hover:text-red-700" />
                                 </button>
                               </div>
                             </td>
@@ -582,32 +591,34 @@ export default function AdminDashboard() {
 
                   {filteredTeams.length === 0 && (
                     <div className="text-center py-12">
-                      <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                      <p className="text-gray-400">No teams found</p>
+                      <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-600">No teams found</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="bg-white/5 rounded-xl p-4 mt-4">
-                <div className="flex flex-wrap gap-6 text-sm text-gray-400">
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-4 mt-4">
+                <div className="flex flex-wrap gap-6 text-sm text-gray-600">
                   <span>
-                    <strong className="text-white">MP:</strong> Matches Played
+                    <strong className="text-gray-900">MP:</strong> Matches
+                    Played
                   </span>
                   <span>
-                    <strong className="text-white">W:</strong> Wins
+                    <strong className="text-gray-900">W:</strong> Wins
                   </span>
                   <span>
-                    <strong className="text-white">D:</strong> Draws
+                    <strong className="text-gray-900">D:</strong> Draws
                   </span>
                   <span>
-                    <strong className="text-white">L:</strong> Losses
+                    <strong className="text-gray-900">L:</strong> Losses
                   </span>
                   <span>
-                    <strong className="text-white">GD:</strong> Goal Difference
+                    <strong className="text-gray-900">GD:</strong> Goal
+                    Difference
                   </span>
                   <span>
-                    <strong className="text-white">PTS:</strong> Points
+                    <strong className="text-gray-900">PTS:</strong> Points
                   </span>
                 </div>
               </div>
@@ -625,19 +636,19 @@ export default function AdminDashboard() {
               {pendingTeams.map((team) => (
                 <div
                   key={team.id}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
+                  className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
                         {team.team_name}
                       </h3>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-gray-600">
                         Group {team.league_group} • Registered{" "}
                         {new Date(team.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-bold">
+                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-bold border-2 border-yellow-300">
                       Pending
                     </span>
                   </div>
@@ -649,7 +660,7 @@ export default function AdminDashboard() {
                           setSelectedImage(team.payment_screenshot_url);
                           setShowImageModal(true);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-2 border-gray-200"
                       >
                         <Eye className="w-4 h-4" />
                         <span className="text-sm">View Payment Screenshot</span>
@@ -660,21 +671,21 @@ export default function AdminDashboard() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => approveTeam(team.id)}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors shadow-md"
                     >
                       <CheckCircle className="w-5 h-5" />
                       Approve
                     </button>
                     <button
                       onClick={() => rejectTeam(team.id)}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-xl transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl transition-colors border-2 border-red-200"
                     >
                       <XCircle className="w-5 h-5" />
                       Reject
                     </button>
                     <button
                       onClick={() => deleteTeam(team.id, team.team_name)}
-                      className="px-4 py-3 bg-gray-500/20 hover:bg-gray-500/30 text-gray-400 font-semibold rounded-xl transition-colors disabled:opacity-50"
+                      className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors disabled:opacity-50 border-2 border-gray-200"
                       disabled={isDeleting}
                       title="Delete Team"
                     >
@@ -685,9 +696,9 @@ export default function AdminDashboard() {
               ))}
 
               {pendingTeams.length === 0 && (
-                <div className="text-center py-12 bg-white/5 rounded-2xl">
-                  <CheckCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No pending approvals</p>
+                <div className="text-center py-12 bg-white border-2 border-gray-200 rounded-2xl">
+                  <CheckCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600">No pending approvals</p>
                 </div>
               )}
             </motion.div>
@@ -700,14 +711,14 @@ export default function AdminDashboard() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg">
                 <div className="grid gap-4">
                   {players.map((player) => {
                     const team = teams.find((t) => t.id === player.team_id);
                     return (
                       <div
                         key={player.id}
-                        className="flex items-center justify-between p-4 bg-black/40 rounded-xl"
+                        className="flex items-center justify-between p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl"
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
@@ -715,19 +726,19 @@ export default function AdminDashboard() {
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-white">
+                              <span className="font-semibold text-gray-900">
                                 {player.player_name}
                               </span>
                               {player.is_captain && (
-                                <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded">
+                                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded border border-yellow-300">
                                   CAPTAIN
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-gray-600">
                               {player.phone}
                               {team && (
-                                <span className="ml-2 text-emerald-400">
+                                <span className="ml-2 text-emerald-600">
                                   • {team.team_name}
                                 </span>
                               )}
@@ -739,7 +750,7 @@ export default function AdminDashboard() {
                             href={`https://instagram.com/${player.instagram}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-pink-400 hover:text-pink-300 text-sm"
+                            className="text-pink-600 hover:text-pink-700 text-sm font-medium"
                           >
                             @{player.instagram}
                           </a>
@@ -751,8 +762,8 @@ export default function AdminDashboard() {
 
                 {players.length === 0 && (
                   <div className="text-center py-12">
-                    <UserCheck className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No players found</p>
+                    <UserCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">No players found</p>
                   </div>
                 )}
               </div>
@@ -801,10 +812,10 @@ export default function AdminDashboard() {
 
       {isDeleting && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-gray-900 border border-white/10 rounded-2xl p-8 text-center">
-            <div className="w-16 h-16 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-white font-semibold mb-2">Deleting Team...</p>
-            <p className="text-gray-400 text-sm">Please wait</p>
+          <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 text-center shadow-2xl">
+            <div className="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-900 font-semibold mb-2">Deleting Team...</p>
+            <p className="text-gray-600 text-sm">Please wait</p>
           </div>
         </div>
       )}
@@ -839,15 +850,15 @@ function EditTeamModal({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-gray-900 border border-white/10 rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white border-2 border-gray-200 rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-gray-900">
             Edit Team Stats - {team.team_name}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-600 hover:text-gray-900 transition-colors"
           >
             <XCircle className="w-6 h-6" />
           </button>
@@ -855,7 +866,7 @@ function EditTeamModal({
 
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               League Group
             </label>
             <select
@@ -863,7 +874,7 @@ function EditTeamModal({
               onChange={(e) =>
                 setStats({ ...stats, league_group: e.target.value })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
             >
               <option value="A">Group A</option>
               <option value="B">Group B</option>
@@ -872,7 +883,7 @@ function EditTeamModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Matches Played (MP)
             </label>
             <input
@@ -885,12 +896,12 @@ function EditTeamModal({
                   matches_played: parseInt(e.target.value) || 0,
                 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Points (PTS)
             </label>
             <input
@@ -900,12 +911,12 @@ function EditTeamModal({
               onChange={(e) =>
                 setStats({ ...stats, points: parseInt(e.target.value) || 0 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-green-300 mb-2">
+            <label className="block text-sm font-medium text-green-700 mb-2">
               Wins (W)
             </label>
             <input
@@ -915,12 +926,12 @@ function EditTeamModal({
               onChange={(e) =>
                 setStats({ ...stats, wins: parseInt(e.target.value) || 0 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-green-500/30 rounded-lg text-white focus:border-green-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-green-200 rounded-lg text-gray-900 focus:border-green-400 focus:outline-none focus:ring-4 focus:ring-green-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-yellow-300 mb-2">
+            <label className="block text-sm font-medium text-yellow-700 mb-2">
               Draws (D)
             </label>
             <input
@@ -930,12 +941,12 @@ function EditTeamModal({
               onChange={(e) =>
                 setStats({ ...stats, draws: parseInt(e.target.value) || 0 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-yellow-500/30 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-yellow-200 rounded-lg text-gray-900 focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-red-300 mb-2">
+            <label className="block text-sm font-medium text-red-700 mb-2">
               Losses (L)
             </label>
             <input
@@ -945,12 +956,12 @@ function EditTeamModal({
               onChange={(e) =>
                 setStats({ ...stats, losses: parseInt(e.target.value) || 0 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-red-500/30 rounded-lg text-white focus:border-red-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-red-200 rounded-lg text-gray-900 focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Goals For (GF)
             </label>
             <input
@@ -960,12 +971,12 @@ function EditTeamModal({
               onChange={(e) =>
                 setStats({ ...stats, goals_for: parseInt(e.target.value) || 0 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Goals Against (GA)
             </label>
             <input
@@ -978,23 +989,23 @@ function EditTeamModal({
                   goals_against: parseInt(e.target.value) || 0,
                 })
               }
-              className="w-full px-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
             />
           </div>
 
           <div className="col-span-2">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-300">
+                <span className="text-sm font-medium text-gray-700">
                   Goal Difference (GD)
                 </span>
                 <span
                   className={`text-2xl font-bold ${
                     goalDifference > 0
-                      ? "text-green-400"
+                      ? "text-green-600"
                       : goalDifference < 0
-                      ? "text-red-400"
-                      : "text-gray-400"
+                      ? "text-red-600"
+                      : "text-gray-600"
                   }`}
                 >
                   {goalDifference > 0 ? "+" : ""}
@@ -1008,13 +1019,13 @@ function EditTeamModal({
         <div className="flex gap-3">
           <button
             onClick={() => onSave(team.id, stats)}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all"
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all shadow-lg"
           >
             Save Changes
           </button>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-colors"
+            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors border-2 border-gray-200"
           >
             Cancel
           </button>

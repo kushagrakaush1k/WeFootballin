@@ -27,16 +27,15 @@ export default function RootLayout({
       const authenticated = !!session;
       setIsAuthenticated(authenticated);
 
-      // Public routes
-      const publicRoutes = ["/signup", "/signin"];
+      // Public routes that don't need auth
+      const publicRoutes = ["/signup", "/signin", "/"];
       const isPublicRoute = publicRoutes.some((route) =>
         pathname?.startsWith(route)
       );
 
-      if (!authenticated && !isPublicRoute) {
+      // Only redirect if trying to access protected routes without auth
+      if (!authenticated && !isPublicRoute && pathname !== "/") {
         router.push("/signup");
-      } else if (authenticated && isPublicRoute) {
-        router.push("/");
       }
     });
 
@@ -55,29 +54,31 @@ export default function RootLayout({
       setIsAuthenticated(authenticated);
 
       // Public routes
-      const publicRoutes = ["/signup", "/signin"];
+      const publicRoutes = ["/signup", "/signin", "/"];
       const isPublicRoute = publicRoutes.some((route) =>
         pathname?.startsWith(route)
       );
 
-      if (!authenticated && !isPublicRoute) {
+      // Only redirect if trying to access protected routes
+      if (!authenticated && !isPublicRoute && pathname !== "/") {
         router.push("/signup");
-      } else {
-        setIsLoading(false);
       }
+
+      setIsLoading(false);
     } catch (error) {
       console.error("Auth check error:", error);
       setIsLoading(false);
     }
   };
 
-  // Show loading only for protected routes
-  const publicRoutes = ["/signup", "/signin"];
+  // Public routes - show these always
+  const publicRoutes = ["/signup", "/signin", "/"];
   const isPublicRoute = publicRoutes.some((route) =>
     pathname?.startsWith(route)
   );
 
-  if (isLoading && !isPublicRoute) {
+  // Show loading only briefly on initial load
+  if (isLoading) {
     return (
       <html lang="en">
         <body className="min-h-screen bg-black">
@@ -92,14 +93,17 @@ export default function RootLayout({
     );
   }
 
-  // Show navbar only when authenticated and not on public routes
-  const showNavbar = isAuthenticated && !isPublicRoute;
+  // Show navbar when authenticated OR on home page
+  const showNavbar = isAuthenticated || pathname === "/";
+  // Show footer on ALL pages
+  const showFooter = true;
 
   return (
     <html lang="en">
-      <body className="min-h-screen bg-black">
+      <body className="min-h-screen bg-black flex flex-col">
         {showNavbar && <Navbar />}
-        {children}
+        <main className="flex-1">{children}</main>
+        {showFooter && <Footer />}
       </body>
     </html>
   );
