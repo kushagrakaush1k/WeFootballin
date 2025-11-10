@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import "./globals.css";
 
 export default function RootLayout({
@@ -103,6 +104,7 @@ export default function RootLayout({
         {showNavbar && <Navbar />}
         <main className="flex-1">{children}</main>
         {showFooter && <Footer />}
+        <ScrollToTop />
       </body>
     </html>
   );
