@@ -56,11 +56,9 @@ export function Navbar() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Show navbar if scrolling up or at the top
       if (currentScrollY < lastScrollY || currentScrollY < 100) {
         setIsNavVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Hide navbar if scrolling down past 100px
         setIsNavVisible(false);
       }
 
@@ -145,8 +143,8 @@ export function Navbar() {
                   <div
                     className={`text-xl font-black tracking-tight transition-colors duration-200 cursor-pointer ${
                       activeLink === link.href
-                        ? "text-emerald-600"
-                        : "text-gray-900 hover:text-emerald-600"
+                        ? "text-emerald-400"
+                        : "text-white hover:text-emerald-400"
                     }`}
                   >
                     {link.label}
@@ -158,7 +156,7 @@ export function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setShowLeaguesMenu(!showLeaguesMenu)}
-                  className="flex items-center gap-2 text-xl font-black text-gray-900 hover:text-emerald-600 transition-colors duration-200 tracking-tight cursor-pointer"
+                  className="flex items-center gap-2 text-xl font-black text-white hover:text-emerald-400 transition-colors duration-200 tracking-tight cursor-pointer"
                 >
                   LEAGUES
                   <ChevronDown
@@ -205,7 +203,7 @@ export function Navbar() {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2.5 text-gray-900 hover:text-emerald-600 transition-colors duration-200 cursor-pointer"
+                className="p-2.5 text-white hover:text-emerald-400 transition-colors duration-200 cursor-pointer"
               >
                 <Instagram className="w-6 h-6" />
               </motion.a>
@@ -214,7 +212,7 @@ export function Navbar() {
                 <div className="flex items-center gap-4">
                   {user.role === "admin" && (
                     <Link href="/admin">
-                      <div className="flex items-center gap-2 px-5 py-2.5 bg-purple-50 border border-purple-300 text-purple-700 rounded-lg font-bold text-sm hover:bg-purple-100 transition-colors duration-200 cursor-pointer">
+                      <div className="flex items-center gap-2 px-5 py-2.5 bg-purple-600/50 border border-purple-400 text-white rounded-lg font-bold text-sm hover:bg-purple-600/70 transition-colors duration-200 cursor-pointer">
                         <LayoutDashboard className="w-4 h-4" />
                         <span>ADMIN</span>
                       </div>
@@ -224,7 +222,7 @@ export function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 border border-emerald-300 rounded-lg hover:bg-emerald-100 transition-colors duration-200 cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600/50 border border-emerald-400 rounded-lg hover:bg-emerald-600/70 transition-colors duration-200 cursor-pointer"
                     >
                       <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
                         <User
@@ -232,11 +230,11 @@ export function Navbar() {
                           strokeWidth={2.5}
                         />
                       </div>
-                      <span className="text-sm font-semibold text-gray-800 max-w-[120px] truncate">
+                      <span className="text-sm font-semibold text-white max-w-[120px] truncate">
                         {user.name}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${
+                        className={`w-4 h-4 text-white transition-transform duration-200 ${
                           showUserMenu ? "rotate-180" : ""
                         }`}
                       />
@@ -290,7 +288,7 @@ export function Navbar() {
               ) : (
                 <div className="flex items-center gap-4">
                   <Link href="/signin">
-                    <button className="px-6 py-2.5 text-gray-900 font-bold text-sm hover:text-emerald-600 transition-colors duration-200 cursor-pointer">
+                    <button className="px-6 py-2.5 text-white font-bold text-sm hover:text-emerald-400 transition-colors duration-200 cursor-pointer">
                       SIGN IN
                     </button>
                   </Link>
@@ -307,7 +305,7 @@ export function Navbar() {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 text-gray-900"
+              className="lg:hidden p-2 text-white"
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -477,8 +475,6 @@ export function Navbar() {
           </>
         )}
       </AnimatePresence>
-
-      <div className="h-28" />
     </>
   );
 }

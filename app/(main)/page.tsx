@@ -8,9 +8,9 @@ export default function HomePage() {
   return (
     <main className="bg-black">
       <HeroSection />
+      <SponsorsSection />
       <ScrollSection />
       <FeaturesSection />
-      <SponsorsSection />
       <CTASection />
     </main>
   );

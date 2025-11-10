@@ -128,3 +128,11 @@ div {
   outline: none;
   outline-offset: 0;
 }
+@font-face {
+  font-family: "TAN Headline";
+  src: url("/fonts/TAN-Headline.woff2") format("woff2"),
+    url("/fonts/TAN-Headline.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

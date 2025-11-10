@@ -19,35 +19,20 @@ export async function signUpUser(data: SignUpData): Promise<AuthResponse> {
 
     if (signUpError) {
       console.error('Sign up error:', signUpError);
+      
+      // Handle rate limit error gracefully
+      if (signUpError.message?.toLowerCase().includes('rate limit')) {
+        return { 
+          user: null, 
+          error: 'Too many signup attempts. Please wait a moment and try again.' 
+        };
+      }
+      
       return { user: null, error: signUpError.message };
     }
 
-    if (authData?.user) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      try {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              email: data.email,
-              full_name: data.fullName,
-              phone: data.phone,
-              role: 'user',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-          ]);
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-        }
-      } catch (profileError) {
-        console.error('Profile creation exception:', profileError);
-      }
-    }
-
+    console.log('User signed up successfully:', authData?.user?.email);
+    
     return { 
       user: authData?.user || null, 
       error: null 
@@ -102,7 +87,6 @@ export async function verifyOTPAndLogin(
     }
 
     if (data?.user) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
       return { 
         user: data.user, 
         error: null 
@@ -113,6 +97,34 @@ export async function verifyOTPAndLogin(
   } catch (error) {
     console.error('OTP verification error:', error);
     return { user: null, error: 'An error occurred during OTP verification' };
+  }
+}
+
+export async function resendOTP(email: string): Promise<{ error: string | null }> {
+  try {
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    });
+
+    if (error) {
+      console.error('Resend OTP error:', error);
+      
+      // Handle rate limit error gracefully
+      if (error.message?.toLowerCase().includes('rate limit')) {
+        return { error: 'Please wait 60 seconds before requesting another code.' };
+      }
+      
+      return { error: error.message };
+    }
+
+    console.log('OTP resent successfully to:', email);
+    return { error: null };
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    return { error: 'Failed to resend OTP. Please try again.' };
   }
 }
 
