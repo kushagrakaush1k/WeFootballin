@@ -1,15 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  Trophy,
-  Instagram,
-  Twitter,
-  Facebook,
-  Mail,
-  Heart,
-} from "lucide-react";
+import { Instagram, Twitter, Facebook, Mail, Heart } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -18,6 +12,7 @@ export function Footer() {
     platform: [
       { label: "Home", href: "/" },
       { label: "Leaderboard", href: "/leaderboard" },
+      { label: "Blog", href: "/blog" },
       { label: "Register Team", href: "/register-team" },
     ],
     support: [
@@ -34,63 +29,52 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative bg-gradient-to-b from-white via-emerald-50/30 to-emerald-50/50 border-t-2 border-emerald-100 pt-20 pb-8 overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0fdf4_1px,transparent_1px),linear-gradient(to_bottom,#f0fdf4_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
-
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-400/5 rounded-full blur-3xl" />
+    <footer className="relative bg-gradient-to-b from-white to-emerald-50/40 border-t border-emerald-100 pt-16 pb-8">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0fdf4_1px,transparent_1px),linear-gradient(to_bottom,#f0fdf4_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-3 group">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 10 }}
-                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 border-2 border-white"
-              >
-                <Trophy className="w-6 h-6 text-white" strokeWidth={2.5} />
-              </motion.div>
-              <span className="text-xl font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                WeFootballin'
-              </span>
-            </Link>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+          <div className="space-y-4">
+            <Image
+              src="/images/wefootballin-logo.png"
+              alt="WeFootballin"
+              width={160}
+              height={55}
+              className="object-contain"
+            />
             <p className="text-gray-600 text-sm leading-relaxed">
               Your ultimate football community platform. Connect, compete, and
               conquer together.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {links.social.map((social, i) => (
                 <motion.a
                   key={i}
                   href={social.href}
-                  whileHover={{ scale: 1.15, y: -4 }}
+                  whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border-2 border-emerald-200/50 hover:border-emerald-300 flex items-center justify-center transition-all group shadow-sm hover:shadow-md"
+                  className="w-9 h-9 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center transition-all"
                   aria-label={social.label}
                 >
-                  <social.icon className="w-5 h-5 text-emerald-600 group-hover:text-emerald-700 transition-colors" />
+                  <social.icon className="w-4 h-4 text-emerald-600" />
                 </motion.a>
               ))}
             </div>
           </div>
 
           <div>
-            <h3 className="text-gray-900 font-black text-lg mb-5 relative inline-block">
-              Platform
-              <div className="absolute -bottom-1 left-0 w-12 h-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" />
-            </h3>
-            <ul className="space-y-3">
+            <h3 className="text-gray-900 font-bold text-base mb-4">Platform</h3>
+            <ul className="space-y-2">
               {links.platform.map((link, i) => (
                 <motion.li
                   key={i}
-                  whileHover={{ x: 4 }}
+                  whileHover={{ x: 2 }}
                   transition={{ duration: 0.2 }}
                 >
                   <Link
                     href={link.href}
-                    className="text-gray-600 hover:text-emerald-600 transition-colors text-sm font-medium flex items-center gap-2 group"
+                    className="text-gray-600 hover:text-emerald-600 transition-colors text-sm"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {link.label}
                   </Link>
                 </motion.li>
@@ -99,22 +83,18 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-gray-900 font-black text-lg mb-5 relative inline-block">
-              Support
-              <div className="absolute -bottom-1 left-0 w-12 h-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" />
-            </h3>
-            <ul className="space-y-3">
+            <h3 className="text-gray-900 font-bold text-base mb-4">Support</h3>
+            <ul className="space-y-2">
               {links.support.map((link, i) => (
                 <motion.li
                   key={i}
-                  whileHover={{ x: 4 }}
+                  whileHover={{ x: 2 }}
                   transition={{ duration: 0.2 }}
                 >
                   <Link
                     href={link.href}
-                    className="text-gray-600 hover:text-emerald-600 transition-colors text-sm font-medium flex items-center gap-2 group"
+                    className="text-gray-600 hover:text-emerald-600 transition-colors text-sm"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {link.label}
                   </Link>
                 </motion.li>
@@ -123,106 +103,105 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-gray-900 font-black text-lg mb-5 relative inline-block">
+            <h3 className="text-gray-900 font-bold text-base mb-4">
               Stay Updated
-              <div className="absolute -bottom-1 left-0 w-12 h-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" />
             </h3>
-            <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+            <p className="text-gray-600 text-sm mb-3">
               Get the latest updates about matches and tournaments
             </p>
             <div className="flex gap-2">
               <input
                 type="email"
                 placeholder="Your email"
-                className="flex-1 px-4 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-900 text-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none transition-colors shadow-sm"
+                className="flex-1 px-3 py-2 bg-white border border-emerald-200 rounded-lg text-sm placeholder:text-gray-400 focus:border-emerald-400 focus:outline-none transition-colors"
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 rounded-xl transition-all shadow-lg shadow-emerald-500/30 border-2 border-white"
+                className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg transition-all shadow-sm"
               >
-                <Mail className="w-5 h-5 text-white" />
+                <Mail className="w-4 h-4 text-white" />
               </motion.button>
             </div>
           </div>
         </div>
 
-        <div className="py-10 border-t-2 border-b-2 border-emerald-100">
-          <div className="text-center mb-8">
-            <p className="text-xs font-black text-gray-500 uppercase tracking-widest mb-6 flex items-center justify-center gap-2">
-              <div className="h-px w-12 bg-gradient-to-r from-transparent to-emerald-300" />
+        <div className="py-8 border-t border-b border-emerald-100">
+          <div className="text-center mb-6">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-5">
               Powered By Our Amazing Partners
-              <div className="h-px w-12 bg-gradient-to-l from-transparent to-emerald-300" />
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-12">
+            <div className="flex flex-wrap items-center justify-center gap-8">
               <motion.div
-                whileHover={{ scale: 1.08, y: -4 }}
-                className="relative group"
+                whileHover={{ scale: 1.05, y: -2 }}
+                className="text-gray-900 font-bold text-2xl px-5 py-2 bg-emerald-50 rounded-lg border border-emerald-200"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity" />
-                <div className="relative text-gray-900 font-black text-3xl px-6 py-3 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border-2 border-emerald-200 group-hover:border-emerald-300 transition-all shadow-sm">
-                  LupLu
-                </div>
+                LupLu
               </motion.div>
 
-              <div className="w-px h-16 bg-gradient-to-b from-transparent via-emerald-300 to-transparent" />
+              <div className="w-px h-12 bg-emerald-200" />
 
               <motion.div
-                whileHover={{ scale: 1.08, y: -4 }}
-                className="relative group"
+                whileHover={{ scale: 1.05, y: -2 }}
+                className="text-gray-800 font-semibold text-xl px-5 py-2 bg-emerald-50 rounded-lg border border-emerald-200"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity" />
-                <div className="relative text-gray-800 font-bold text-2xl px-6 py-3 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border-2 border-emerald-200 group-hover:border-emerald-300 transition-all shadow-sm">
-                  IKIGAI
-                </div>
+                IKIGAI
               </motion.div>
 
-              <div className="w-px h-16 bg-gradient-to-b from-transparent via-emerald-300 to-transparent" />
+              <div className="w-px h-12 bg-emerald-200" />
 
               <motion.div
-                whileHover={{ scale: 1.08, y: -4 }}
-                className="relative group"
+                whileHover={{ scale: 1.05, y: -2 }}
+                className="text-gray-700 font-medium text-lg px-5 py-2 bg-emerald-50 rounded-lg border border-emerald-200"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity" />
-                <div className="relative text-gray-700 font-semibold text-xl px-6 py-3 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border-2 border-emerald-200 group-hover:border-emerald-300 transition-all shadow-sm">
-                  Delhi Heights
-                </div>
+                Delhi Heights
               </motion.div>
             </div>
           </div>
         </div>
 
-        <div className="pt-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-gray-600 text-sm font-medium flex items-center gap-2">
+        <div className="pt-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            <p className="text-gray-600 text-sm flex items-center gap-2">
               © {currentYear} WeFootballin'. Made with
               <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />
               in India
             </p>
-            <div className="flex items-center gap-8 text-sm">
+            <div className="flex items-center gap-6 text-sm">
               <Link
                 href="/terms"
-                className="text-gray-600 hover:text-emerald-600 transition-colors font-medium"
+                className="text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 Terms
               </Link>
               <Link
                 href="/privacy"
-                className="text-gray-600 hover:text-emerald-600 transition-colors font-medium"
+                className="text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 Privacy
               </Link>
               <Link
                 href="/cookies"
-                className="text-gray-600 hover:text-emerald-600 transition-colors font-medium"
+                className="text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 Cookies
               </Link>
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-center">
-            <div className="h-px w-full max-w-md bg-gradient-to-r from-transparent via-emerald-300 to-transparent" />
+          <div className="flex items-center justify-center md:justify-end">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="opacity-60 hover:opacity-100 transition-opacity"
+            >
+              <Image
+                src="/images/wefootballin-logo.png"
+                alt="WeFootballin"
+                width={120}
+                height={40}
+                className="object-contain"
+              />
+            </motion.div>
           </div>
         </div>
       </div>

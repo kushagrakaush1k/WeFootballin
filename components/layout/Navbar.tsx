@@ -10,6 +10,7 @@ import {
   useTransform,
 } from "framer-motion";
 import {
+  Home,
   Menu,
   X,
   Trophy,
@@ -17,7 +18,7 @@ import {
   LogOut,
   User,
   ChevronDown,
-  Sparkles,
+  BookOpen,
   Zap,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -38,7 +39,7 @@ export function Navbar() {
   const supabase = createClient();
 
   const { scrollY } = useScroll();
-  const navOpacity = useTransform(scrollY, [0, 100], [0.98, 1]);
+  const navOpacity = useTransform(scrollY, [0, 100], [0.95, 1]);
 
   useEffect(() => {
     getUser();
@@ -93,8 +94,9 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { href: "/", label: "Home", icon: null },
+    { href: "/", label: "Home", icon: Home },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+    { href: "/blog", label: "Blog", icon: BookOpen },
     { href: "/register-team", label: "ROCK8", icon: Zap, highlight: true },
   ];
 
@@ -104,151 +106,97 @@ export function Navbar() {
         style={{ opacity: navOpacity }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 120, damping: 25 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 m-0 ${
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? "bg-white/85 backdrop-blur-2xl border-b-2 border-emerald-200/50 shadow-[0_8px_32px_rgba(16,185,129,0.08)]"
-            : "bg-white/70 backdrop-blur-xl border-b border-gray-200/60"
+            ? "bg-white/90 backdrop-blur-xl border-b border-emerald-200/60 shadow-sm"
+            : "bg-white/80 backdrop-blur-lg border-b border-gray-200/40"
         }`}
       >
-        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link
-              href="/"
-              className="flex items-center gap-3 group relative z-10"
-            >
+            <Link href="/" className="flex items-center">
               <motion.div
-                whileHover={{ scale: 1.08, rotate: 5 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                className="relative"
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-green-500 rounded-2xl blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-300" />
-                <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 via-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/50 transition-all duration-300 border-2 border-white/50 overflow-hidden">
-                  <Image
-                    src="/images/logofootballin.jpg"
-                    alt="WeFootballin Logo"
-                    width={48}
-                    height={48}
-                    className="object-cover w-full h-full rounded-2xl"
-                    priority
-                  />
-                  <motion.div
-                    className="absolute -top-1 -right-1 z-10"
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      rotate: [0, 180, 360],
-                      opacity: [0.7, 1, 0.7],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  >
-                    <Sparkles
-                      className="w-3 h-3 text-yellow-300 drop-shadow-lg"
-                      fill="currentColor"
-                    />
-                  </motion.div>
-                </div>
+                <Image
+                  src="/images/wefootballin-logo.png"
+                  alt="WeFootballin"
+                  width={90}
+                  height={90}
+                  className="object-contain"
+                  priority
+                />
               </motion.div>
-
-              <div className="flex flex-col">
-                <motion.span
-                  className="text-2xl font-black bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 bg-clip-text text-transparent"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  WeFootballin'
-                </motion.span>
-                <span className="text-[10px] font-bold text-emerald-500/70 tracking-widest uppercase -mt-1">
-                  Elite Platform
-                </span>
-              </div>
             </Link>
 
-            <div className="hidden md:flex items-center gap-2">
-              {navLinks.map((link, index) => {
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (
-                  <motion.div
+                  <Link
                     key={link.href}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    href={link.href}
+                    onClick={() => setActiveLink(link.href)}
                   >
-                    <Link
-                      href={link.href}
-                      onClick={() => setActiveLink(link.href)}
-                      className="relative group"
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                        link.highlight
+                          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md shadow-emerald-500/25"
+                          : activeLink === link.href
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "text-gray-700 hover:text-emerald-600 hover:bg-emerald-50/50"
+                      }`}
                     >
-                      <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`relative px-6 py-3 rounded-xl font-bold transition-all duration-300 ${
-                          link.highlight
-                            ? "bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 border-2 border-white/30"
-                            : activeLink === link.href
-                            ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-200"
-                            : "text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/50 border-2 border-transparent hover:border-emerald-200/50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 relative z-10">
-                          {Icon && <Icon className="w-4 h-4" />}
-                          <span>{link.label}</span>
-                        </div>
-                      </motion.div>
-                    </Link>
-                  </motion.div>
+                      <div className="flex items-center gap-2">
+                        {Icon && <Icon className="w-4 h-4" />}
+                        <span>{link.label}</span>
+                      </div>
+                    </motion.div>
+                  </Link>
                 );
               })}
 
-              <div className="relative w-[2px] h-10 mx-2">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-400/30 to-transparent" />
-              </div>
+              <div className="w-px h-8 bg-gray-200 mx-2" />
 
               {user ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   {user.role === "admin" && (
                     <Link href="/admin">
                       <motion.div
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="relative group"
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 border border-purple-200 text-purple-700 rounded-lg font-semibold text-sm hover:bg-purple-100 transition-colors"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
-                        <div className="relative flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 text-purple-700 rounded-xl font-bold hover:border-purple-300 transition-all duration-300 shadow-sm shadow-purple-500/10">
-                          <LayoutDashboard className="w-4 h-4" />
-                          <span>Admin</span>
-                        </div>
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span>Admin</span>
                       </motion.div>
                     </Link>
                   )}
 
                   <div className="relative">
                     <motion.button
-                      whileHover={{ scale: 1.03, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-xl hover:border-emerald-300 transition-all duration-300 group shadow-sm shadow-emerald-500/10"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
                     >
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full blur-md opacity-30 group-hover:opacity-50 transition-opacity" />
-                        <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-md shadow-emerald-500/30 border-2 border-white">
-                          <User
-                            className="w-4 h-4 text-white"
-                            strokeWidth={2.5}
-                          />
-                        </div>
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
+                        <User
+                          className="w-4 h-4 text-white"
+                          strokeWidth={2.5}
+                        />
                       </div>
-                      <span className="text-sm font-bold text-gray-800 max-w-[120px] truncate">
+                      <span className="text-sm font-semibold text-gray-800 max-w-[100px] truncate">
                         {user.name}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 text-gray-600 transition-all duration-300 ${
-                          showUserMenu ? "rotate-180 text-emerald-600" : ""
+                        className={`w-4 h-4 text-gray-600 transition-transform ${
+                          showUserMenu ? "rotate-180" : ""
                         }`}
                       />
                     </motion.button>
@@ -261,18 +209,18 @@ export function Navbar() {
                             onClick={() => setShowUserMenu(false)}
                           />
                           <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute right-0 top-full mt-3 w-64 bg-white/95 backdrop-blur-2xl border-2 border-emerald-200 rounded-2xl shadow-2xl shadow-emerald-500/20 overflow-hidden z-50"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="absolute right-0 top-full mt-2 w-56 bg-white border border-emerald-200 rounded-xl shadow-xl overflow-hidden z-50"
                           >
-                            <div className="p-4 border-b border-emerald-100 bg-gradient-to-br from-emerald-50 to-green-50">
+                            <div className="p-4 border-b border-emerald-100 bg-emerald-50/50">
                               <div className="flex items-center gap-3">
-                                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg border-2 border-white">
-                                  <User className="w-6 h-6 text-white" />
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
+                                  <User className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
-                                  <p className="font-bold text-gray-900 text-sm">
+                                  <p className="font-semibold text-gray-900 text-sm">
                                     {user.name}
                                   </p>
                                   <p className="text-xs text-gray-600">
@@ -283,15 +231,13 @@ export function Navbar() {
                             </div>
 
                             <div className="p-2">
-                              <motion.button
-                                whileHover={{ scale: 1.02, x: 4 }}
-                                whileTap={{ scale: 0.98 }}
+                              <button
                                 onClick={handleSignOut}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 font-semibold"
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors font-medium text-sm"
                               >
                                 <LogOut className="w-4 h-4" />
                                 <span>Sign Out</span>
-                              </motion.button>
+                              </button>
                             </div>
                           </motion.div>
                         </>
@@ -300,21 +246,21 @@ export function Navbar() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <Link href="/signin">
                     <motion.button
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-6 py-3 text-gray-700 font-bold hover:bg-emerald-50 rounded-xl transition-all duration-300 border-2 border-transparent hover:border-emerald-200"
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-5 py-2.5 text-gray-700 font-semibold text-sm hover:bg-emerald-50 rounded-lg transition-colors"
                     >
                       Sign In
                     </motion.button>
                   </Link>
                   <Link href="/signup">
                     <motion.button
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 border-2 border-white/30 transition-all"
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold text-sm rounded-lg shadow-md shadow-emerald-500/25 transition-all"
                     >
                       Sign Up
                     </motion.button>
@@ -324,9 +270,9 @@ export function Navbar() {
             </div>
 
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden relative p-3 text-gray-700 hover:bg-emerald-50 rounded-xl transition-all z-10 border-2 border-transparent hover:border-emerald-200"
+              className="md:hidden p-2 text-gray-700 hover:bg-emerald-50 rounded-lg transition-colors"
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -349,16 +295,21 @@ export function Navbar() {
               className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 md:hidden"
             />
             <motion.div
-              initial={{ opacity: 0, x: "100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
-              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white/95 backdrop-blur-2xl border-l-2 border-emerald-200 z-50 md:hidden overflow-y-auto shadow-2xl"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              className="fixed right-0 top-0 bottom-0 w-80 bg-white border-l border-emerald-200 z-50 md:hidden overflow-y-auto shadow-xl"
             >
               <div className="p-6 space-y-6">
                 <div className="flex items-center justify-between pb-6 border-b border-emerald-200">
-                  <span className="text-lg font-black bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                    WeFootballin'
-                  </span>
+                  <Image
+                    src="/images/wefootballin-logo.png"
+                    alt="WeFootballin"
+                    width={140}
+                    height={50}
+                    className="object-contain"
+                  />
                   <button
                     onClick={() => setIsOpen(false)}
                     className="p-2 hover:bg-emerald-50 rounded-lg transition-colors"
@@ -373,10 +324,10 @@ export function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all ${
                         link.highlight
-                          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg"
-                          : "text-gray-700 hover:bg-emerald-50 border-2 border-transparent hover:border-emerald-200"
+                          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md"
+                          : "text-gray-700 hover:bg-emerald-50"
                       }`}
                     >
                       {link.icon && <link.icon className="w-5 h-5" />}
@@ -391,7 +342,7 @@ export function Navbar() {
                       <Link
                         href="/admin"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-4 bg-purple-50 text-purple-700 rounded-xl font-bold border-2 border-purple-200"
+                        className="flex items-center gap-3 px-4 py-3 bg-purple-50 text-purple-700 rounded-lg font-semibold border border-purple-200"
                       >
                         <LayoutDashboard className="w-5 h-5" />
                         Admin Panel
@@ -399,19 +350,21 @@ export function Navbar() {
                     )}
 
                     <div className="pt-6 border-t border-emerald-200">
-                      <div className="flex items-center gap-3 px-4 py-4 bg-emerald-50 rounded-xl mb-4 border-2 border-emerald-200">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center border-2 border-white shadow-lg">
-                          <User className="w-6 h-6 text-white" />
+                      <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 rounded-lg mb-4">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900">{user.name}</p>
+                          <p className="font-semibold text-gray-900">
+                            {user.name}
+                          </p>
                           <p className="text-sm text-gray-600">{user.email}</p>
                         </div>
                       </div>
 
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-red-50 text-red-600 rounded-xl font-bold border-2 border-red-200 hover:bg-red-100 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors"
                       >
                         <LogOut className="w-5 h-5" />
                         Sign Out
@@ -423,14 +376,14 @@ export function Navbar() {
                     <Link
                       href="/signin"
                       onClick={() => setIsOpen(false)}
-                      className="block px-4 py-4 text-center text-gray-700 font-bold bg-emerald-50 rounded-xl border-2 border-emerald-200 hover:bg-emerald-100 transition-colors"
+                      className="block px-4 py-3 text-center text-gray-700 font-semibold bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/signup"
                       onClick={() => setIsOpen(false)}
-                      className="block px-4 py-4 text-center bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg"
+                      className="block px-4 py-3 text-center bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-lg shadow-md"
                     >
                       Sign Up
                     </Link>
