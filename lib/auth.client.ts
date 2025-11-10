@@ -9,6 +9,7 @@ export async function signUpUser(data: SignUpData): Promise<AuthResponse> {
       email: data.email,
       password: data.password,
       options: {
+        emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
         data: {
           full_name: data.fullName,
           phone: data.phone,
@@ -17,32 +18,40 @@ export async function signUpUser(data: SignUpData): Promise<AuthResponse> {
     });
 
     if (signUpError) {
+      console.error('Sign up error:', signUpError);
       return { user: null, error: signUpError.message };
     }
 
-    if (authData.user) {
+    if (authData?.user) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: authData.user.id,
-            email: data.email,
-            full_name: data.fullName,
-            phone: data.phone,
-            role: 'user',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ]);
+      try {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: authData.user.id,
+              email: data.email,
+              full_name: data.fullName,
+              phone: data.phone,
+              role: 'user',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ]);
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
+      } catch (profileError) {
+        console.error('Profile creation exception:', profileError);
       }
     }
 
-    return { user: authData.user, error: null };
+    return { 
+      user: authData?.user || null, 
+      error: null 
+    };
   } catch (error) {
     console.error('Sign up error:', error);
     return { user: null, error: 'An error occurred during sign up' };
@@ -60,21 +69,27 @@ export async function signInUser(data: SignInData): Promise<AuthResponse> {
       });
 
     if (signInError) {
+      console.error('Sign in error:', signInError);
       return { user: null, error: signInError.message };
     }
 
-    return { user: authData.user, error: null };
+    return { 
+      user: authData?.user || null, 
+      error: null 
+    };
   } catch (error) {
     console.error('Sign in error:', error);
     return { user: null, error: 'An error occurred during sign in' };
   }
 }
 
-export async function verifyOTPAndLogin(email: string, otp: string): Promise<AuthResponse> {
+export async function verifyOTPAndLogin(
+  email: string,
+  otp: string
+): Promise<AuthResponse> {
   try {
     const supabase = createClient();
 
-    // Verify OTP with Supabase
     const { data, error: verifyError } = await supabase.auth.verifyOtp({
       email: email,
       token: otp,
@@ -82,12 +97,16 @@ export async function verifyOTPAndLogin(email: string, otp: string): Promise<Aut
     });
 
     if (verifyError) {
+      console.error('OTP verification error:', verifyError);
       return { user: null, error: verifyError.message };
     }
 
-    if (data.user) {
+    if (data?.user) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      return { user: data.user, error: null };
+      return { 
+        user: data.user, 
+        error: null 
+      };
     }
 
     return { user: null, error: 'OTP verification failed' };
