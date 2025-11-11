@@ -38,7 +38,6 @@ export async function signUpUser({
       };
     }
 
-    // Sign up
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: email.toLowerCase().trim(),
       password: password,
@@ -53,7 +52,9 @@ export async function signUpUser({
     if (signUpError) {
       return {
         user: null,
-        error: signUpError.message || "Failed to sign up. Please try again later.",
+        error:
+          signUpError.message ||
+          "Failed to sign up. Please try again later.",
       };
     }
 
@@ -64,7 +65,6 @@ export async function signUpUser({
       };
     }
 
-    // Auto sign in the user after signup
     const { data: signInData, error: signInError } =
       await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
@@ -114,7 +114,6 @@ export async function signInUser({
       });
 
     if (signInError) {
-      // Generic error messages - no email confirmation checks
       if (
         signInError.message.includes("Invalid login credentials") ||
         signInError.message.includes("invalid") ||
@@ -126,7 +125,6 @@ export async function signInUser({
         };
       }
 
-      // Ignore email confirmation errors completely
       if (signInError.message.toLowerCase().includes("confirm")) {
         return {
           user: null,
@@ -136,7 +134,9 @@ export async function signInUser({
 
       return {
         user: null,
-        error: signInError.message || "Failed to sign in. Please try again.",
+        error:
+          signInError.message ||
+          "Failed to sign in. Please try again.",
       };
     }
 
