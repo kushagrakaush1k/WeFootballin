@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -33,8 +34,13 @@ export function Navbar() {
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const supabase = createClient();
+  const pathname = usePathname();
+
+  // Dynamic color for nav links depending on route
+  const isDarkNavbar = pathname === "/"; // change this if you have multiple dark-background pages
 
   useEffect(() => {
+    // Try session restore on mount for persistent login
     getUser();
 
     const {
@@ -53,15 +59,17 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    setActiveLink(pathname);
+  }, [pathname]);
+
+  useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (currentScrollY < lastScrollY || currentScrollY < 100) {
         setIsNavVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsNavVisible(false);
       }
-
       setLastScrollY(currentScrollY);
     };
 
@@ -84,7 +92,6 @@ export function Navbar() {
       .select("*")
       .eq("id", userId)
       .single();
-
     if (profile) {
       setUser(profile);
     }
@@ -93,7 +100,7 @@ export function Navbar() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    window.location.href = "/signup";
+    window.location.href = "/signin";
   };
 
   const navLinks = [
@@ -101,8 +108,15 @@ export function Navbar() {
     { href: "/pickup", label: "PICKUP" },
     { href: "/blog", label: "BLOG" },
   ];
-
   const leagueLinks = [{ href: "/register-team", label: "ROCK8", icon: Zap }];
+
+  // Helper for color: white on dark pages, emerald/dark on light
+  const navLinkColor = (linkHref: string) =>
+    activeLink === linkHref
+      ? "text-emerald-400"
+      : isDarkNavbar
+      ? "text-white hover:text-emerald-400"
+      : "text-gray-900 hover:text-emerald-600";
 
   return (
     <>
@@ -110,7 +124,9 @@ export function Navbar() {
         initial={{ y: 0 }}
         animate={{ y: isNavVisible ? 0 : -120 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed top-0 left-0 right-0 z-50 bg-transparent"
+        className={`fixed top-0 left-0 right-0 z-50 ${
+          isDarkNavbar ? "bg-transparent" : "bg-white shadow"
+        }`}
       >
         <div className="max-w-full mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between h-28">
@@ -141,11 +157,9 @@ export function Navbar() {
                   onClick={() => setActiveLink(link.href)}
                 >
                   <div
-                    className={`text-xl font-black tracking-tight transition-colors duration-200 cursor-pointer ${
-                      activeLink === link.href
-                        ? "text-emerald-400"
-                        : "text-white hover:text-emerald-400"
-                    }`}
+                    className={`text-xl font-black tracking-tight transition-colors duration-200 cursor-pointer ${navLinkColor(
+                      link.href
+                    )}`}
                   >
                     {link.label}
                   </div>
@@ -156,7 +170,11 @@ export function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setShowLeaguesMenu(!showLeaguesMenu)}
-                  className="flex items-center gap-2 text-xl font-black text-white hover:text-emerald-400 transition-colors duration-200 tracking-tight cursor-pointer"
+                  className={`flex items-center gap-2 text-xl font-black transition-colors duration-200 tracking-tight cursor-pointer ${
+                    isDarkNavbar
+                      ? "text-white hover:text-emerald-400"
+                      : "text-gray-900 hover:text-emerald-600"
+                  }`}
                 >
                   LEAGUES
                   <ChevronDown
@@ -203,7 +221,11 @@ export function Navbar() {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2.5 text-white hover:text-emerald-400 transition-colors duration-200 cursor-pointer"
+                className={`p-2.5 ${
+                  isDarkNavbar
+                    ? "text-white hover:text-emerald-400"
+                    : "text-emerald-600 hover:text-emerald-800"
+                } transition-colors duration-200 cursor-pointer`}
               >
                 <Instagram className="w-6 h-6" />
               </motion.a>
@@ -269,7 +291,6 @@ export function Navbar() {
                                 </div>
                               </div>
                             </div>
-
                             <div className="p-2">
                               <button
                                 onClick={handleSignOut}
@@ -286,18 +307,17 @@ export function Navbar() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
-                  <Link href="/signin">
-                    <button className="px-6 py-2.5 text-white font-bold text-sm hover:text-emerald-400 transition-colors duration-200 cursor-pointer">
-                      SIGN IN
-                    </button>
-                  </Link>
-                  <Link href="/signup">
-                    <button className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer">
-                      SIGN UP
-                    </button>
-                  </Link>
-                </div>
+                <Link href="/signin">
+                  <button
+                    className={`px-6 py-2.5 font-bold text-sm transition-colors duration-200 cursor-pointer ${
+                      isDarkNavbar
+                        ? "text-white hover:text-emerald-400"
+                        : "text-emerald-600 hover:text-emerald-800"
+                    }`}
+                  >
+                    SIGN IN
+                  </button>
+                </Link>
               )}
             </div>
 
@@ -305,7 +325,9 @@ export function Navbar() {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 text-white"
+              className={`lg:hidden p-2 ${
+                isDarkNavbar ? "text-white" : "text-emerald-600"
+              }`}
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -453,20 +475,13 @@ export function Navbar() {
                     </div>
                   </>
                 ) : (
-                  <div className="pt-8 border-t border-emerald-200 space-y-3">
+                  <div className="pt-8 border-t border-emerald-200">
                     <Link
                       href="/signin"
                       onClick={() => setIsOpen(false)}
-                      className="block px-4 py-3 text-center text-gray-700 font-bold bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors duration-200"
+                      className="block px-4 py-3 text-center text-white font-bold bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors duration-200"
                     >
                       SIGN IN
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={() => setIsOpen(false)}
-                      className="block px-4 py-3 text-center bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-lg shadow-md"
-                    >
-                      SIGN UP
                     </Link>
                   </div>
                 )}

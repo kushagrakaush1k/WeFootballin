@@ -8,6 +8,15 @@ import { Instagram, Twitter, Facebook, Mail, Heart } from "lucide-react";
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const sponsors = [
+    { name: "LUPLU", logo: "/images/luplu-logo.png" },
+    { name: "XTCY", logo: "/images/XTCY-logo.png" },
+    { name: "LOOKS SALON", logo: "/images/Looks-salon-logo.png" },
+    { name: "IKIGAI", logo: "/images/ikigai-logo.png" },
+    { name: "DELHI HEIGHTS", logo: "/images/delhi-heights-logo.png" },
+    { name: "ROYAL GREEN", logo: "/images/royal-green-logo.png" },
+  ];
+
   const links = {
     platform: [
       { label: "Home", href: "/" },
@@ -126,41 +135,40 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="py-8 border-t border-b border-emerald-100">
-          <div className="text-center mb-6">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-5">
-              Powered By Our Amazing Partners
+        {/* Sponsors Section - Clean Grid Layout */}
+        <div className="py-10 border-t border-emerald-100">
+          <div className="text-center mb-8">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              Our Official Partners
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-8">
+            <p className="text-sm text-gray-600">
+              Proudly supported by these amazing brands
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center justify-items-center">
+            {sponsors.map((sponsor, index) => (
               <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                className="text-gray-900 font-bold text-2xl px-5 py-2 bg-emerald-50 rounded-lg border border-emerald-200"
+                key={sponsor.name}
+                whileHover={{ scale: 1.08, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="w-full"
               >
-                LupLu
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow h-24 flex items-center justify-center">
+                  <Image
+                    src={sponsor.logo}
+                    alt={sponsor.name}
+                    width={90}
+                    height={60}
+                    className="object-contain brightness-110 contrast-105"
+                  />
+                </div>
               </motion.div>
-
-              <div className="w-px h-12 bg-emerald-200" />
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                className="text-gray-800 font-semibold text-xl px-5 py-2 bg-emerald-50 rounded-lg border border-emerald-200"
-              >
-                IKIGAI
-              </motion.div>
-
-              <div className="w-px h-12 bg-emerald-200" />
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                className="text-gray-700 font-medium text-lg px-5 py-2 bg-emerald-50 rounded-lg border border-emerald-200"
-              >
-                Delhi Heights
-              </motion.div>
-            </div>
+            ))}
           </div>
         </div>
 
-        <div className="pt-8">
+        <div className="pt-8 border-t border-emerald-100">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <p className="text-gray-600 text-sm flex items-center gap-2">
               © {currentYear} WeFootballin'. Made with

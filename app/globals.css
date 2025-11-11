@@ -136,3 +136,10 @@ div {
   font-style: normal;
   font-display: swap;
 }
+@media (max-width: 640px) {
+  .sponsor-logo-container {
+    min-width: 140px !important;
+    height: 90px !important;
+    width: 150px !important;
+  }
+}

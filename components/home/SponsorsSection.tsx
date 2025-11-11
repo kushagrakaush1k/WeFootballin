@@ -1,47 +1,52 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 
-// SPONSOR LOGOS (add/remove as needed)
 const sponsors = [
   {
     name: "LUPLU",
     logo: "/images/luplu-logo.png",
+    link: "https://example.com/luplu",
     darkBg: true,
   },
   {
     name: "XTCY",
     logo: "/images/XTCY-logo.png",
+    link: "https://example.com/xtcy",
     darkBg: false,
   },
   {
     name: "LOOKS SALON",
     logo: "/images/Looks-salon-logo.png",
+    link: "https://example.com/looks-salon",
     darkBg: false,
   },
   {
     name: "IKIGAI",
     logo: "/images/ikigai-logo.png",
+    link: "https://example.com/ikigai",
     darkBg: false,
   },
   {
     name: "DELHI HEIGHTS",
     logo: "/images/delhi-heights-logo.png",
+    link: "https://example.com/delhi-heights",
     darkBg: false,
   },
   {
     name: "ROYAL GREEN",
     logo: "/images/royal-green-logo.png",
+    link: "https://example.com/royal-green",
     darkBg: false,
   },
 ];
 
 export default function SponsorsSection() {
   return (
-    <section className="bg-[#f7faf8] py-28 px-0 w-full overflow-hidden select-none">
-      <div className="max-w-6xl mx-auto px-6 py-2 flex flex-col items-center">
+    <section className="bg-[#f7faf8] py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 w-full overflow-hidden select-none">
+      <div className="max-w-6xl mx-auto mb-10 sm:mb-14 flex flex-col items-center">
         <h2
-          className="uppercase font-black text-4xl md:text-5xl mb-3 tracking-tight"
+          className="uppercase font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-2 tracking-tight text-center px-4"
           style={{
             color: "#356f35",
             letterSpacing: "0.03em",
@@ -50,11 +55,10 @@ export default function SponsorsSection() {
         >
           Our Official Partners
         </h2>
-        <p className="text-lg md:text-2xl mb-12 text-[#3e6142] font-semibold text-center">
-          Proudly funded and supported by these amazing brands
+        <p className="text-base sm:text-lg md:text-xl text-[#3e6142] font-semibold text-center px-4">
+          Proudly supported by these amazing brands
         </p>
       </div>
-
       <LogosSlideshow />
     </section>
   );
@@ -63,31 +67,32 @@ export default function SponsorsSection() {
 function LogosSlideshow() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPaused = useRef(false);
+  const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
-
-    let animationFrameId: number;
-    const scrollSpeed = 0.5; // Adjust for slower/faster
-
+    const scrollSpeed = 0.7;
+    let scrollPosition = 0;
+    const firstChild = scrollContainer.firstElementChild as HTMLElement;
+    if (!firstChild) return;
+    const itemWidth = firstChild.offsetWidth;
+    const gap = 64;
+    const singleSetWidth = (itemWidth + gap) * sponsors.length;
     const scroll = () => {
       if (!isPaused.current && scrollContainer) {
-        scrollContainer.scrollLeft += scrollSpeed;
-
-        // Reset to beginning when scrolled halfway (seamless loop)
-        if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 2) {
-          scrollContainer.scrollLeft = 0;
+        scrollPosition += scrollSpeed;
+        if (scrollPosition >= singleSetWidth) {
+          scrollPosition = 0;
         }
+        scrollContainer.scrollLeft = Math.floor(scrollPosition);
       }
-      animationFrameId = requestAnimationFrame(scroll);
+      animationRef.current = requestAnimationFrame(scroll);
     };
-
-    animationFrameId = requestAnimationFrame(scroll);
-
+    animationRef.current = requestAnimationFrame(scroll);
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
   }, []);
@@ -95,9 +100,11 @@ function LogosSlideshow() {
   const handleMouseEnter = () => {
     isPaused.current = true;
   };
-
   const handleMouseLeave = () => {
     isPaused.current = false;
+  };
+  const handleSponsorClick = (link: string) => {
+    window.open(link, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -105,14 +112,14 @@ function LogosSlideshow() {
       className="relative py-2 overflow-hidden w-full"
       style={{
         WebkitMaskImage:
-          "linear-gradient(90deg, transparent 0px, #000 60px, #000 calc(100% - 60px), transparent 100%)",
+          "linear-gradient(90deg, transparent 0px, #000 40px, #000 calc(100% - 40px), transparent 100%)",
         maskImage:
-          "linear-gradient(90deg, transparent 0px, #000 60px, #000 calc(100% - 60px), transparent 100%)",
+          "linear-gradient(90deg, transparent 0px, #000 40px, #000 calc(100% - 40px), transparent 100%)",
       }}
     >
       <div
         ref={scrollRef}
-        className="flex gap-16 overflow-x-hidden whitespace-nowrap"
+        className="flex gap-8 sm:gap-12 md:gap-16 overflow-x-hidden whitespace-nowrap"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -122,50 +129,53 @@ function LogosSlideshow() {
         onTouchStart={handleMouseEnter}
         onTouchEnd={handleMouseLeave}
       >
-        {/* Triple the sponsors for seamless infinite loop */}
-        {[...sponsors, ...sponsors, ...sponsors].map((sponsor, index) => (
-          <div
-            key={`${sponsor.name}-${index}`}
-            className="flex flex-col items-center justify-center flex-shrink-0"
-            style={{ minWidth: "200px" }}
-          >
-            <div
-              className="flex items-center justify-center transition-transform hover:scale-105"
-              style={{
-                background: "#1a1a1a",
-                borderRadius: 20,
-                height: 110,
-                width: 190,
-                boxShadow: "0 4px 20px rgba(53, 111, 53, 0.25)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-              }}
+        {[...sponsors, ...sponsors, ...sponsors, ...sponsors].map(
+          (sponsor, index) => (
+            <button
+              key={`${sponsor.name}-${index}`}
+              onClick={() => handleSponsorClick(sponsor.link)}
+              className="flex flex-col items-center justify-center flex-shrink-0 cursor-pointer group"
+              style={{ minWidth: "150px" }}
+              aria-label={`Visit ${sponsor.name}`}
             >
-              <Image
-                src={sponsor.logo}
-                alt={sponsor.name}
-                width={130}
-                height={85}
+              <div
+                className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl"
                 style={{
-                  objectFit: "contain",
-                  filter: "brightness(1.1) contrast(1.05)",
+                  background: "#1a1a1a",
+                  borderRadius: 16,
+                  height: 90,
+                  width: 150,
+                  boxShadow: "0 4px 20px rgba(53, 111, 53, 0.25)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
                 }}
-                className="w-[130px] h-[85px]"
-              />
-            </div>
-            <span
-              className="mt-4 text-sm font-extrabold uppercase tracking-wide text-center px-4 py-2 rounded-lg"
-              style={{
-                color: "#ffffff",
-                background: "#1a1a1a",
-                letterSpacing: "0.05em",
-                boxShadow: "0 2px 12px rgba(53, 111, 53, 0.2)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              {sponsor.name}
-            </span>
-          </div>
-        ))}
+              >
+                <Image
+                  src={sponsor.logo}
+                  alt={sponsor.name}
+                  width={110}
+                  height={70}
+                  style={{
+                    objectFit: "contain",
+                    filter: "brightness(1.1) contrast(1.05)",
+                  }}
+                  className="w-[110px] h-[70px] transition-all duration-300 group-hover:brightness-125"
+                />
+              </div>
+              <span
+                className="mt-3 text-xs sm:text-sm font-extrabold uppercase tracking-wide text-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 group-hover:bg-emerald-600 group-hover:scale-105"
+                style={{
+                  color: "#ffffff",
+                  background: "#1a1a1a",
+                  letterSpacing: "0.05em",
+                  boxShadow: "0 2px 12px rgba(53, 111, 53, 0.2)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              >
+                {sponsor.name}
+              </span>
+            </button>
+          )
+        )}
       </div>
     </div>
   );

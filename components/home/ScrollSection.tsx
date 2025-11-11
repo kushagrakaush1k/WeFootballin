@@ -19,10 +19,10 @@ export default function ScrollSection({
     offset: ["start start", "end start"],
   });
 
-  // SUPER FAST - fills in first 30% of scroll
+  // ULTRA FAST - fills in first 20% of scroll
   const wordProgress = useTransform(
     scrollYProgress,
-    [0, 0.3],
+    [0, 0.2],
     [0, words.length]
   );
 
@@ -40,9 +40,11 @@ export default function ScrollSection({
   return (
     <div
       ref={containerRef}
-      className="relative w-full py-0 my-0"
+      className="relative w-full flex flex-col justify-center items-center"
       style={{
-        height: `${60 + words.length * 4}vh`,
+        height: `${40 + words.length * 3}vh`, // Vertical height, can tweak as needed.
+        margin: 0,
+        padding: 0,
       }}
     >
       {/* Background */}
@@ -50,15 +52,13 @@ export default function ScrollSection({
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none" />
 
       {/* Content Container */}
-      <div className="h-screen w-full flex items-center justify-center px-4 sm:px-6 relative py-0 my-0">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex flex-col justify-center items-center px-4 sm:px-6 z-10">
         {/* Glow Effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="max-w-4xl w-full relative z-10">
-          <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-center py-0 my-0">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-4xl w-full relative z-20 flex flex-col items-center">
+          <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight text-center">
             {words.map((word, idx) => {
               const isActive = idx < activeWordIndex;
-
               return (
                 <motion.span
                   key={idx}
@@ -69,7 +69,7 @@ export default function ScrollSection({
                     scale: isActive ? 1 : 0.95,
                   }}
                   transition={{
-                    duration: 0.15,
+                    duration: 0.1,
                     ease: "easeOut",
                   }}
                   style={{
@@ -84,10 +84,9 @@ export default function ScrollSection({
               );
             })}
           </p>
-
           {/* Progress Bar */}
           <motion.div
-            className="mt-6 max-w-sm mx-auto py-0 my-0"
+            className="mt-6 max-w-xs sm:max-w-sm mx-auto w-full"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -105,8 +104,7 @@ export default function ScrollSection({
                 }}
               />
             </div>
-
-            <div className="flex justify-between mt-1.5 text-xs font-bold text-gray-500 gap-1">
+            <div className="flex justify-between mt-1.5 text-xs font-bold text-gray-500 gap-1 w-full">
               <span>Start</span>
               <motion.span
                 className={
