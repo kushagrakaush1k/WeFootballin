@@ -6,7 +6,7 @@ import {
   isUserAuthenticated,
 } from "@/lib/auth.client";
 
-// Export client-side functions
+// Export all client-side auth functions
 export {
   signUpUser,
   signInUser,
