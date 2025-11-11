@@ -20,18 +20,6 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-
-const getUserEmail = async (userId: string) => {
-  try {
-    const { data, error } = await supabase.auth.admin.getUserById(userId);
-    if (error) throw error;
-    return data.user?.email || "Unknown";
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    return "Unknown";
-  }
-};
-
 interface Team {
   id: string;
   team_name: string;
@@ -47,6 +35,7 @@ interface Team {
   points: number;
   goal_difference: number;
   created_at: string;
+  user_id?: string;
 }
 
 interface Player {
@@ -253,7 +242,7 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center pt-24">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading admin dashboard...</p>
@@ -388,7 +377,6 @@ export default function AdminDashboard() {
                 className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100"
               />
             </div>
-
             {activeTab === "teams" && (
               <select
                 value={selectedGroup}
@@ -459,7 +447,7 @@ export default function AdminDashboard() {
                   Welcome to Admin Panel
                 </h2>
                 <p className="text-gray-600">
-                  Manage all aspects of the ROCK8 League from here
+                  Manage all aspects of the WeFootballin' League from here
                 </p>
               </div>
             </motion.div>
