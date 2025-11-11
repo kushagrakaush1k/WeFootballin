@@ -1,130 +1,184 @@
-import { createClient } from '@/lib/supabase/client';
-import type { SignUpData, SignInData, AuthResponse } from './supabase/database.types';
+import { createClient } from "@/lib/supabase/client";
 
-export async function signUpUser(data: SignUpData): Promise<AuthResponse> {
+interface SignUpUserParams {
+  email: string;
+  password: string;
+  fullName: string;
+  phone: string;
+}
+
+interface SignUpUserResponse {
+  user: any | null;
+  error: string | null;
+}
+
+interface SignInUserParams {
+  email: string;
+  password: string;
+}
+
+interface SignInUserResponse {
+  user: any | null;
+  error: string | null;
+}
+
+export async function signUpUser({
+  email,
+  password,
+  fullName,
+  phone,
+}: SignUpUserParams): Promise<SignUpUserResponse> {
   try {
     const supabase = createClient();
 
+    if (!email || !password || !fullName || !phone) {
+      return {
+        user: null,
+        error: "Missing required fields",
+      };
+    }
+
+    // Sign up
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
+      email: email.toLowerCase().trim(),
+      password: password,
       options: {
-        emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
         data: {
-          full_name: data.fullName,
-          phone: data.phone,
+          full_name: fullName.trim(),
+          phone: phone.trim(),
         },
       },
     });
 
     if (signUpError) {
-      console.error('Sign up error:', signUpError);
-      
-      // Handle rate limit error gracefully
-      if (signUpError.message?.toLowerCase().includes('rate limit')) {
-        return { 
-          user: null, 
-          error: 'Too many signup attempts. Please wait a moment and try again.' 
-        };
-      }
-      
-      return { user: null, error: signUpError.message };
-    }
-
-    console.log('User signed up successfully:', authData?.user?.email);
-    
-    return { 
-      user: authData?.user || null, 
-      error: null 
-    };
-  } catch (error) {
-    console.error('Sign up error:', error);
-    return { user: null, error: 'An error occurred during sign up' };
-  }
-}
-
-export async function signInUser(data: SignInData): Promise<AuthResponse> {
-  try {
-    const supabase = createClient();
-
-    const { data: authData, error: signInError } =
-      await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-
-    if (signInError) {
-      console.error('Sign in error:', signInError);
-      return { user: null, error: signInError.message };
-    }
-
-    return { 
-      user: authData?.user || null, 
-      error: null 
-    };
-  } catch (error) {
-    console.error('Sign in error:', error);
-    return { user: null, error: 'An error occurred during sign in' };
-  }
-}
-
-export async function verifyOTPAndLogin(
-  email: string,
-  otp: string
-): Promise<AuthResponse> {
-  try {
-    const supabase = createClient();
-
-    const { data, error: verifyError } = await supabase.auth.verifyOtp({
-      email: email,
-      token: otp,
-      type: 'signup',
-    });
-
-    if (verifyError) {
-      console.error('OTP verification error:', verifyError);
-      return { user: null, error: verifyError.message };
-    }
-
-    if (data?.user) {
-      return { 
-        user: data.user, 
-        error: null 
+      return {
+        user: null,
+        error: signUpError.message || "Failed to sign up. Please try again later.",
       };
     }
 
-    return { user: null, error: 'OTP verification failed' };
-  } catch (error) {
-    console.error('OTP verification error:', error);
-    return { user: null, error: 'An error occurred during OTP verification' };
+    if (!authData.user) {
+      return {
+        user: null,
+        error: "Sign up failed. Please try again.",
+      };
+    }
+
+    // Auto sign in the user after signup
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password: password,
+      });
+
+    if (signInError || !signInData.user) {
+      return {
+        user: authData.user,
+        error: null,
+      };
+    }
+
+    return {
+      user: signInData.user,
+      error: null,
+    };
+  } catch (err: any) {
+    console.error("Sign up error:", err);
+    return {
+      user: null,
+      error:
+        err?.message ||
+        "An unexpected error occurred during sign up. Please try again.",
+    };
   }
 }
 
-export async function resendOTP(email: string): Promise<{ error: string | null }> {
+export async function signInUser({
+  email,
+  password,
+}: SignInUserParams): Promise<SignInUserResponse> {
   try {
     const supabase = createClient();
 
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: email,
-    });
-
-    if (error) {
-      console.error('Resend OTP error:', error);
-      
-      // Handle rate limit error gracefully
-      if (error.message?.toLowerCase().includes('rate limit')) {
-        return { error: 'Please wait 60 seconds before requesting another code.' };
-      }
-      
-      return { error: error.message };
+    if (!email || !password) {
+      return {
+        user: null,
+        error: "Email and password are required",
+      };
     }
 
-    console.log('OTP resent successfully to:', email);
-    return { error: null };
-  } catch (error) {
-    console.error('Resend OTP error:', error);
-    return { error: 'Failed to resend OTP. Please try again.' };
+    const { data: authData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password: password,
+      });
+
+    if (signInError) {
+      // Generic error messages - no email confirmation checks
+      if (
+        signInError.message.includes("Invalid login credentials") ||
+        signInError.message.includes("invalid") ||
+        signInError.message.includes("Invalid")
+      ) {
+        return {
+          user: null,
+          error: "Invalid email or password. Please try again.",
+        };
+      }
+
+      // Ignore email confirmation errors completely
+      if (signInError.message.toLowerCase().includes("confirm")) {
+        return {
+          user: null,
+          error: "There was an issue. Please try again or contact support.",
+        };
+      }
+
+      return {
+        user: null,
+        error: signInError.message || "Failed to sign in. Please try again.",
+      };
+    }
+
+    if (!authData.user || !authData.session) {
+      return {
+        user: null,
+        error: "Sign in failed. Please try again.",
+      };
+    }
+
+    return {
+      user: authData.user,
+      error: null,
+    };
+  } catch (err: any) {
+    console.error("Sign in error:", err);
+    return {
+      user: null,
+      error:
+        err?.message ||
+        "An unexpected error occurred. Please try again.",
+    };
+  }
+}
+
+export async function getCurrentUser() {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error("Error getting current user:", error);
+      return null;
+    }
+
+    return user;
+  } catch (err) {
+    console.error("Get current user error:", err);
+    return null;
   }
 }
 
@@ -134,53 +188,27 @@ export async function signOutUser() {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      return { error: error.message };
+      console.error("Sign out error:", error);
+      return false;
     }
 
-    return { error: null };
-  } catch (error) {
-    console.error('Sign out error:', error);
-    return { error: 'An error occurred during sign out' };
+    return true;
+  } catch (err) {
+    console.error("Sign out error:", err);
+    return false;
   }
 }
 
-export async function getCurrentUser() {
+export async function isUserAuthenticated() {
   try {
     const supabase = createClient();
-
     const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (error || !user) {
-      return { user: null, error: error?.message || 'Not authenticated' };
-    }
-
-    return { user, error: null };
-  } catch (error) {
-    console.error('Get current user error:', error);
-    return { user: null, error: 'An error occurred' };
-  }
-}
-
-export async function getProfile(userId: string) {
-  try {
-    const supabase = createClient();
-
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error) {
-      return { profile: null, error: error.message };
-    }
-
-    return { profile, error: null };
-  } catch (error) {
-    console.error('Get profile error:', error);
-    return { profile: null, error: 'An error occurred' };
+    return !!session;
+  } catch (err) {
+    console.error("Auth check error:", err);
+    return false;
   }
 }

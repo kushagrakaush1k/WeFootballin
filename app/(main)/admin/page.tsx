@@ -20,6 +20,18 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+
+const getUserEmail = async (userId: string) => {
+  try {
+    const { data, error } = await supabase.auth.admin.getUserById(userId);
+    if (error) throw error;
+    return data.user?.email || "Unknown";
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    return "Unknown";
+  }
+};
+
 interface Team {
   id: string;
   team_name: string;

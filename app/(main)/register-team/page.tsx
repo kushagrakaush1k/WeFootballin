@@ -154,19 +154,92 @@ export default function RegisterTeamPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [hasExistingTeam, setHasExistingTeam] = useState(false);
 
   const supabase = createClient();
   const router = useRouter();
 
   useEffect(() => {
     checkUser();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+        setUserEmail(session.user.email || null);
+        await checkExistingTeam(session.user.id);
+        setError(null);
+      } else {
+        setUserId(null);
+        setUserEmail(null);
+        setHasExistingTeam(false);
+      }
+      setIsCheckingAuth(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) setUserId(user.id);
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        setUserId(null);
+        setUserEmail(null);
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      if (session && session.user) {
+        setUserId(session.user.id);
+        setUserEmail(session.user.email || null);
+        await checkExistingTeam(session.user.id);
+        setError(null);
+      } else {
+        setUserId(null);
+        setUserEmail(null);
+      }
+    } catch (err) {
+      console.error("Auth check error:", err);
+      setUserId(null);
+      setUserEmail(null);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
+  const checkExistingTeam = async (currentUserId: string) => {
+    try {
+      const { data: existingTeam, error } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking existing team:", error);
+        return;
+      }
+
+      if (existingTeam) {
+        setHasExistingTeam(true);
+      } else {
+        setHasExistingTeam(false);
+      }
+    } catch (err) {
+      console.error("Error in checkExistingTeam:", err);
+    }
   };
 
   const addPlayer = () => {
@@ -225,7 +298,10 @@ export default function RegisterTeamPage() {
 
   const handleSubmit = async () => {
     if (!userId) {
-      setError("Please login to register a team");
+      setError("Please login to register a team. Redirecting to login...");
+      setTimeout(() => {
+        router.push("/signin");
+      }, 2000);
       return;
     }
 
@@ -233,6 +309,13 @@ export default function RegisterTeamPage() {
     setError(null);
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Session expired. Please login again.");
+      }
+
       const { data: teamData, error: teamError } = await supabase
         .from("teams")
         .insert({
@@ -270,10 +353,22 @@ export default function RegisterTeamPage() {
 
       if (playersError) throw playersError;
 
+      setHasExistingTeam(true);
       setStep(4);
     } catch (error: any) {
       console.error("Registration error:", error);
-      setError(error.message || "Failed to register team");
+
+      if (
+        error.message?.includes("JWT") ||
+        error.message?.includes("session")
+      ) {
+        setError("Your session has expired. Please login again.");
+        setTimeout(() => {
+          router.push("/signin");
+        }, 2000);
+      } else {
+        setError(error.message || "Failed to register team. Please try again.");
+      }
       setIsSubmitting(false);
     }
   };
@@ -286,12 +381,161 @@ export default function RegisterTeamPage() {
         players.length >= 8 &&
         players.length <= 15
       );
-    if (step === 3) return paymentScreenshot !== null;
+    if (step === 3) return paymentScreenshot !== null && userId !== null;
     return false;
   };
 
   const progress = (step / 3) * 100;
 
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center pt-24">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full"
+        />
+      </div>
+    );
+  }
+
+  // IF USER ALREADY HAS A TEAM - SHOW CONFIRMATION MESSAGE
+  if (hasExistingTeam) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 pt-24 pb-16">
+        {/* Animated Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-400/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-emerald-300/10 rounded-full blur-3xl animate-pulse delay-500" />
+        </div>
+
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", duration: 0.6 }}
+            className="text-center py-16"
+          >
+            {/* Success Icon */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center mx-auto mb-8 shadow-2xl"
+            >
+              <PartyPopper className="w-16 h-16 text-white" />
+            </motion.div>
+
+            {/* Main Message */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-4xl md:text-5xl font-black text-gray-900 mb-6"
+            >
+              🎉 Registration Submitted!
+            </motion.h1>
+
+            {/* Confirmation Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white/95 backdrop-blur-xl border-2 border-emerald-300 rounded-3xl p-8 md:p-12 shadow-2xl mb-10"
+            >
+              <div className="flex items-start gap-4 mb-6">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <CheckCircle2 className="w-8 h-8 text-emerald-600 flex-shrink-0" />
+                </motion.div>
+                <p className="text-lg md:text-xl text-gray-800 font-semibold text-left">
+                  You'll see your team on the leaderboard once you are confirmed
+                  by us and the tournament starts, see you soon! 🚀
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-100 to-green-100 border-2 border-emerald-300 rounded-2xl p-6 space-y-3">
+                <h3 className="font-black text-lg text-gray-900 mb-4">
+                  What Happens Next?
+                </h3>
+                <div className="space-y-3 text-left">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white font-bold text-xs">1</span>
+                    </div>
+                    <p className="text-gray-700 font-semibold">
+                      Our admin team will verify your payment within 24-48 hours
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white font-bold text-xs">2</span>
+                    </div>
+                    <p className="text-gray-700 font-semibold">
+                      You'll receive a confirmation email with match schedule &
+                      group details
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white font-bold text-xs">3</span>
+                    </div>
+                    <p className="text-gray-700 font-semibold">
+                      Your team will appear on the leaderboard when the
+                      tournament starts! 🏆
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Call to Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
+              <a
+                href="/leaderboard"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+              >
+                View Leaderboard
+                <Trophy className="w-5 h-5" />
+              </a>
+              <a
+                href="/"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border-3 border-emerald-300 text-gray-900 font-bold rounded-xl hover:bg-emerald-50 transition-all shadow-lg"
+              >
+                Back to Home
+              </a>
+            </motion.div>
+
+            {/* Support Message */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-10 text-gray-600 font-semibold"
+            >
+              Need help? Contact us at{" "}
+              <a
+                href="mailto:wefootballin@gmail.com"
+                className="text-emerald-600 hover:text-emerald-700 font-bold"
+              >
+                wefootballin@gmail.com
+              </a>
+            </motion.p>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // ORIGINAL REGISTRATION FORM (if user doesn't have a team)
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 pt-24 pb-16">
       {/* Animated Background */}
@@ -333,6 +577,31 @@ export default function RegisterTeamPage() {
             Ready to dominate? Let's get you signed up! ⚽
           </p>
         </motion.div>
+
+        {/* Login Required Warning */}
+        {!userId && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-5 bg-amber-50 border-2 border-amber-300 rounded-2xl flex items-start gap-3 shadow-lg"
+          >
+            <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
+            <div>
+              <p className="text-amber-900 font-bold text-base mb-2">
+                Please login to register a team
+              </p>
+              <p className="text-amber-800 text-sm mb-3">
+                You need to be logged in to register your team for the league.
+              </p>
+              <button
+                onClick={() => router.push("/signin")}
+                className="px-5 py-2 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 transition-colors"
+              >
+                Go to Login
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Error Alert */}
         <AnimatePresence>
@@ -820,7 +1089,7 @@ export default function RegisterTeamPage() {
                   onClick={() =>
                     step === 3 ? handleSubmit() : setStep(step + 1)
                   }
-                  disabled={!canProceed() || isSubmitting}
+                  disabled={!canProceed() || isSubmitting || !userId}
                   className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                 >
                   {isSubmitting ? (
@@ -867,7 +1136,7 @@ export default function RegisterTeamPage() {
           >
             Need help? Contact us at{" "}
             <a
-              href="mailto:support@wefootballin.com"
+              href="mailto:wefootballin@gmail.com"
               className="text-emerald-600 hover:text-emerald-700 font-bold"
             >
               wefootballin@gmail.com
