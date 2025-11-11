@@ -1,5 +1,4 @@
 import { requireAuth, getUserWithRole } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,17 +10,21 @@ export async function GET() {
 
   const { user, supabase } = authResult;
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  try {
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-  if (error) {
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ user, profile });
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ user, profile });
 }
 
 export async function PUT(request: Request) {

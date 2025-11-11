@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function requireAuth() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -11,10 +11,7 @@ export async function requireAuth() {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     return {
@@ -31,7 +28,7 @@ export async function requireAuth() {
 
 export async function getUserWithRole(userId: string) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data: profile, error } = await supabase
       .from("profiles")
