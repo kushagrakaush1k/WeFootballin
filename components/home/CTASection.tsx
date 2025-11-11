@@ -3,24 +3,30 @@ import React, { useState } from "react";
 
 const faqs = [
   {
-    question: "Sample FAQ Question 1?",
-    answer: "Replace this answer as needed for your FAQ.",
+    question: "How do I join a WeFootballin’ game?",
+    answer:
+      "You can join a game through our regular hosted pickup matches in GK 1 and GK 2. We announce games in advance — simply register your spot, show up, and play. If you’re an individual player, we’ll slot you into a balanced team. If you already have a group, you can register together. No team? No problem — we’ll help you find one!",
   },
   {
-    question: "Sample FAQ Question 2?",
-    answer: "Custom answer goes here, update for your app.",
+    question: "Do I need to be part of a fixed team to play?",
+    answer:
+      "Not at all. WeFootballin’ is designed for everyone — whether you play solo or as part of a crew. •	Solo players can join open pickup games.•	Groups or teams can register together and compete against others. Our system helps individuals and teams connect easily — ensuring that everyone gets to play, every time.",
   },
   {
-    question: "Sample FAQ Question 3?",
-    answer: "More explanation for this question.",
+    question:
+      "What are match recordings and photos, and how can I access them?",
+    answer:
+      "We capture match highlights, recordings, and photos from our hosted games — so you can relive your favorite moments and share them with friends. All recordings and images are uploaded to our official platforms after the games. You’ll receive a link to view or download them — it’s part of the WeFootballin’ experience!",
   },
   {
-    question: "Sample FAQ Question 4?",
-    answer: "Fourth FAQ's detail to swap out.",
+    question: "Where is WeFootballin’ currently active?",
+    answer:
+      "We’re currently operational in Greater Kailash 1 (GK 1) and Greater Kailash 2 (GK 2), where we host regular games and mini-tournaments. We’re also working on expanding to new areas soon — so stay tuned for updates on our next locations!",
   },
   {
-    question: "Sample FAQ Question 5?",
-    answer: "Edit as required for your final FAQ list.",
+    question: "How can I stay updated on upcoming matches or tournaments?",
+    answer:
+      "We post all match schedules, registration links, and updates through our official communication channels — including WhatsApp groups, Instagram, and our community announcements. You can also reach out directly to our coordinators in GK 1 or GK 2 to join the player list and get notified of upcoming games.",
   },
 ];
 
