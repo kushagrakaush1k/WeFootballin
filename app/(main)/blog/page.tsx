@@ -36,7 +36,7 @@ interface BlogPost {
   category: string;
   image: string;
   tags: string[];
-  pages?: string[]; // For slideshow blogs
+  pages?: string[];
 }
 
 export default function BlogPage() {
@@ -46,7 +46,6 @@ export default function BlogPage() {
   const [bookmarked, setBookmarked] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Blog posts data
   const blogPosts: BlogPost[] = [
     {
       id: "wefootballin-magazine",
@@ -65,7 +64,7 @@ export default function BlogPage() {
       date: "November 11, 2025",
       readTime: "10 min read",
       category: "Magazine",
-      image: "/images/blog1.png", // THUMBNAIL - CHANGE THIS LINE TO UPDATE THUMBNAIL
+      image: "/images/blog1.png",
       tags: ["WeFootballin", "Magazine", "Community", "Football"],
       pages: [
         "/images/blog1.png",
@@ -113,17 +112,17 @@ export default function BlogPage() {
   };
 
   const nextPage = () => {
-    if (selectedPost?.pages) {
+    if (selectedPost?.pages && selectedPost.pages.length > 0) {
       setCurrentPage((prev) =>
-        prev === selectedPost.pages.length - 1 ? 0 : prev + 1
+        prev === selectedPost.pages!.length - 1 ? 0 : prev + 1
       );
     }
   };
 
   const prevPage = () => {
-    if (selectedPost?.pages) {
+    if (selectedPost?.pages && selectedPost.pages.length > 0) {
       setCurrentPage((prev) =>
-        prev === 0 ? selectedPost.pages.length - 1 : prev - 1
+        prev === 0 ? selectedPost.pages!.length - 1 : prev - 1
       );
     }
   };
@@ -264,7 +263,6 @@ export default function BlogPage() {
 
             <article className="bg-white rounded-2xl overflow-hidden border border-emerald-100 shadow-lg">
               {selectedPost.pages ? (
-                // SLIDESHOW VIEW FOR MULTI-PAGE BLOGS
                 <div>
                   <div className="relative h-96 md:h-[600px] overflow-hidden bg-gray-900">
                     <AnimatePresence mode="wait">
@@ -285,7 +283,6 @@ export default function BlogPage() {
                       </motion.div>
                     </AnimatePresence>
 
-                    {/* Navigation Buttons */}
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -304,12 +301,10 @@ export default function BlogPage() {
                       <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
                     </motion.button>
 
-                    {/* Page Indicator */}
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-semibold">
                       Page {currentPage + 1} of {selectedPost.pages.length}
                     </div>
 
-                    {/* Page Dots */}
                     <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2">
                       {selectedPost.pages.map((_, idx) => (
                         <motion.button
@@ -325,7 +320,6 @@ export default function BlogPage() {
                     </div>
                   </div>
 
-                  {/* Content Section */}
                   <div className="p-8 md:p-12">
                     <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-100">
                       <div>
@@ -449,7 +443,6 @@ export default function BlogPage() {
                   </div>
                 </div>
               ) : (
-                // REGULAR VIEW FOR SINGLE-PAGE BLOGS
                 <>
                   <div className="relative h-96">
                     <Image
