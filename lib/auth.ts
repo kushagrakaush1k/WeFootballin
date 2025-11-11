@@ -1,4 +1,5 @@
-import {
+// Re-export from auth.client
+export {
   signUpUser,
   signInUser,
   signOutUser,
@@ -6,11 +7,5 @@ import {
   isUserAuthenticated,
 } from "@/lib/auth.client";
 
-// Export all client-side auth functions
-export {
-  signUpUser,
-  signInUser,
-  signOutUser,
-  getCurrentUser,
-  isUserAuthenticated,
-};
+// Re-export from auth.server
+export { requireAuth, getUserWithRole } from "@/lib/auth.server";

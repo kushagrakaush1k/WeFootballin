@@ -1,20 +1,20 @@
-import { requireAuth, getUserWithRole } from '@/lib/auth';
-import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { requireAuth, getUserWithRole } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const authResult = await requireAuth();
-  
+
   if (authResult instanceof NextResponse) {
     return authResult;
   }
-  
+
   const { user, supabase } = authResult;
 
   const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
     .single();
 
   if (error) {
@@ -26,11 +26,11 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   const authResult = await requireAuth();
-  
+
   if (authResult instanceof NextResponse) {
     return authResult;
   }
-  
+
   const { user, supabase } = authResult;
 
   try {
@@ -41,7 +41,7 @@ export async function PUT(request: Request) {
       data: {
         full_name: body.full_name,
         phone: body.phone,
-      }
+      },
     });
 
     if (userError) {
@@ -50,18 +50,21 @@ export async function PUT(request: Request) {
 
     // Update profile
     const { data: profile, error: profileError } = await supabase
-      .from('profiles')
+      .from("profiles")
       .update({
         full_name: body.full_name,
         phone: body.phone,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', user.id)
+      .eq("id", user.id)
       .select()
       .single();
 
     if (profileError) {
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: profileError.message },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ profile });
