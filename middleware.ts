@@ -57,23 +57,31 @@ export async function middleware(request: NextRequest) {
   // Refresh session if expired
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Define public routes (only auth pages and API)
-  const publicRoutes = ['/signin', '/api', '/auth']
-  const isPublicRoute = publicRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
+  // Define public routes that don't need auth
+  const publicPaths = [
+    '/',              // Home page is public
+    '/signin',        // Sign in page
+    '/api',           // API routes
+    '/auth'           // Auth callback routes
+  ]
+  
+  const isPublicPath = publicPaths.some(path => {
+    if (path === '/') {
+      return request.nextUrl.pathname === '/'
+    }
+    return request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
+  })
 
-  // If user is NOT logged in and trying to access ANY page except auth pages
-  // Redirect them to SIGNIN (changed from signup)
-  if (!user && !isPublicRoute) {
+  // If user is NOT logged in and trying to access protected routes
+  if (!user && !isPublicPath) {
     const url = new URL('/signin', request.url)
+    url.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(url)
   }
 
-  // If user IS logged in and trying to access signup/signin pages
-  // Send them to homepage
-  if (user && (request.nextUrl.pathname === '/signup' || request.nextUrl.pathname === '/signin')) {
-    const url = new URL('/', request.url)
+  // If user IS logged in and trying to access signin page, redirect to admin
+  if (user && request.nextUrl.pathname === '/signin') {
+    const url = new URL('/admin', request.url)
     return NextResponse.redirect(url)
   }
 
@@ -82,13 +90,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, etc)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

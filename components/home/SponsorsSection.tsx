@@ -6,37 +6,37 @@ const sponsors = [
   {
     name: "LUPLU",
     logo: "/images/luplu-logo.png",
-    link: "https://example.com/luplu",
+    link: "https://luplu.com",
     darkBg: true,
   },
   {
     name: "XTCY",
     logo: "/images/XTCY-logo.png",
-    link: "https://example.com/xtcy",
+    link: "https://xtcy.com",
     darkBg: false,
   },
   {
     name: "LOOKS SALON",
     logo: "/images/Looks-salon-logo.png",
-    link: "https://example.com/looks-salon",
+    link: "https://www.lookssalon.in",
     darkBg: false,
   },
   {
     name: "IKIGAI",
     logo: "/images/ikigai-logo.png",
-    link: "https://example.com/ikigai",
+    link: "https://www.instagram.com/ikigaicdh?igsh=MXBxZ2lqNDQxYXZ4Yg==",
     darkBg: false,
   },
   {
     name: "DELHI HEIGHTS",
     logo: "/images/delhi-heights-logo.png",
-    link: "https://example.com/delhi-heights",
+    link: "https://stores.cafedelhiheights.com",
     darkBg: false,
   },
   {
     name: "ROYAL GREEN",
     logo: "/images/royal-green-logo.png",
-    link: "https://example.com/royal-green",
+    link: "https://www.instagram.com/royalgreenspirits?igsh=N3hmNWZscW9weTFu",
     darkBg: false,
   },
 ];

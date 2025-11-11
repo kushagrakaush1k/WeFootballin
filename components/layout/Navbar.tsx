@@ -216,7 +216,7 @@ export function Navbar() {
             <div className="hidden lg:flex items-center gap-6">
               {/* Instagram Button */}
               <motion.a
-                href="https://instagram.com/wefootballin"
+                href="https://instagram.com/we_footballin"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.1 }}
