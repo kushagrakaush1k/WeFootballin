@@ -119,8 +119,15 @@ export default function AuthPage() {
       }
 
       if (user) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        router.push("/");
+        // Check for redirect parameter
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirect = searchParams.get("redirect");
+
+        // Wait for session to be fully established
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        // Redirect to intended page or admin
+        window.location.href = redirect || "/admin";
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -128,7 +135,6 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
-
   const handleSignUp = async (): Promise<void> => {
     setIsLoading(true);
     setError("");
@@ -205,8 +211,11 @@ export default function AuthPage() {
       }
 
       if (user) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        router.push("/");
+        // Wait for session to be fully established
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        // Redirect to admin after signup
+        window.location.href = "/admin";
       }
     } catch (err) {
       setError("OTP verification failed. Please try again.");
@@ -214,7 +223,6 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
-
   if (step === "verify") {
     const isOtpComplete = otp.join("").length === 8;
 

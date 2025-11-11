@@ -20,23 +20,12 @@ export default function WhatsAppFloat({
 
   return (
     <>
-      <div className="fixed bottom-6 left-6 z-50 flex items-center gap-3">
-        {/* Tooltip */}
-        <div
-          className={`transition-all duration-300 ease-out ${
-            isHovered
-              ? "opacity-100 translate-x-0"
-              : "opacity-0 -translate-x-2 pointer-events-none"
-          }`}
-        >
-          <div className="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg whitespace-nowrap text-sm font-medium">
-            Chat With Us!
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full">
-              <div className="border-8 border-transparent border-l-gray-900"></div>
-            </div>
-          </div>
-        </div>
-
+      <div
+        className="fixed bottom-6 left-0 z-50 flex items-center"
+        style={{
+          marginLeft: 0,
+        }}
+      >
         {/* WhatsApp Button */}
         <button
           onClick={handleClick}
@@ -44,10 +33,13 @@ export default function WhatsAppFloat({
           onMouseLeave={() => setIsHovered(false)}
           className="group relative"
           aria-label="Chat on WhatsApp"
+          style={{
+            marginLeft: 50,
+            paddingLeft: 0,
+          }}
         >
           {/* Outer pulse ring */}
-          <span className="absolute inset-0 rounded-full bg-green-500 opacity-75 animate-ping"></span>
-
+          <span className="absolute inset-0 rounded-full bg-green-500 opacity-75 animate-ping pointer-events-none"></span>
           {/* Button container */}
           <div
             className={`relative w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg flex items-center justify-center transition-all duration-300 ${
@@ -65,8 +57,27 @@ export default function WhatsAppFloat({
             </svg>
           </div>
         </button>
-      </div>
 
+        {/* Tooltip on right of button */}
+        <div
+          className={`relative transition-all duration-300 ease-out`}
+          style={{
+            marginLeft: isHovered ? 12 : -12,
+            opacity: isHovered ? 1 : 0,
+            transform: isHovered ? "translateX(0)" : "translateX(-20px)",
+            pointerEvents: isHovered ? "auto" : "none",
+            transition: "all 0.3s",
+          }}
+        >
+          <div className="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg whitespace-nowrap text-sm font-medium relative ml-4">
+            Chat With Us!
+            {/* Pointer/arrow on left of tooltip */}
+            <div className="absolute left-[-16px] top-1/2 -translate-y-1/2">
+              <div className="border-8 border-transparent border-r-gray-900"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <style jsx>{`
         @keyframes ping {
           75%,

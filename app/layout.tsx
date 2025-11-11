@@ -43,10 +43,11 @@ export default function RootLayout({
     };
   }, []);
 
-  // Don't show navbar/footer on auth pages
+  // Don't show navbar/footer/whatsapp on auth pages
   const isAuthPage = pathname === "/signin";
   const showNavbar = !isAuthPage;
   const showFooter = !isAuthPage;
+  const showWhatsApp = !isAuthPage;
 
   // Minimal loading state - only show for a split second
   if (isLoading) {
@@ -69,11 +70,13 @@ export default function RootLayout({
         {showFooter && <Footer />}
         <ScrollToTop />
 
-        {/* WhatsApp Float Button - Replace with your actual WhatsApp number */}
-        <WhatsAppFloat
-          phoneNumber="918448586155"
-          message="Hi! I want to join WeFootballin'"
-        />
+        {/* WhatsApp Float Button - Stick to LEFT, no gap, hide on auth pages */}
+        {showWhatsApp && (
+          <WhatsAppFloat
+            phoneNumber="918448586155"
+            message="Hi! I want to join WeFootballin'"
+          />
+        )}
       </body>
     </html>
   );

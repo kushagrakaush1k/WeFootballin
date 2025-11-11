@@ -78,11 +78,22 @@ export function Navbar() {
   }, [lastScrollY]);
 
   const getUser = async () => {
+    // Force refresh session
     const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-    if (authUser) {
-      await fetchUserProfile(authUser.id);
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("Session error:", error);
+      setUser(null);
+      return;
+    }
+
+    if (session?.user) {
+      await fetchUserProfile(session.user.id);
+    } else {
+      setUser(null);
     }
   };
 
