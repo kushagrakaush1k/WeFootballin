@@ -439,7 +439,7 @@ export function Navbar() {
                 {/* Mobile Instagram */}
                 <div className="flex justify-center pt-4 border-t border-emerald-200">
                   <motion.a
-                    href="https://instagram.com/wefootballin"
+                    href="https://instagram.com/we_footballin"
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.1 }}
