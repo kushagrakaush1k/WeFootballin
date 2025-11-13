@@ -889,10 +889,12 @@ export default function RegisterTeamPage() {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border-2 border-emerald-300">
                         <span className="font-bold text-emerald-700">
-                          UPI ID:
+                          Payment Details:
                         </span>
                         <span className="text-lg font-black text-emerald-700">
-                          yespay.smessi33319@yesbankltd
+                          UPI Id - yespay.smessi33319@yesbankltd Account
+                          details: A/C No. - 143261900001540 IFSC code -
+                          YESB0001432 Name -  Luplu apparel
                         </span>
                       </div>
                     </div>
