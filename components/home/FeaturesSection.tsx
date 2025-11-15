@@ -1,8 +1,9 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 
 const teams = [
-  { name: "Thunder FC", logo: "⚡" },
+  { name: "Spartans FC", logo: "/images/spartans.png" },
   { name: "Phoenix United", logo: "🔥" },
   { name: "Storm Riders", logo: "⛈️" },
   { name: "Velocity SC", logo: "💨" },
@@ -23,10 +24,12 @@ const teams = [
 export default function FeaturesSection() {
   const [active, setActive] = useState<number | null>(null);
 
+  // Helper function to determine if logo is an image or emoji
+  const isImageLogo = (logo: string) => logo.startsWith("/");
+
   return (
     <section className="bg-white min-h-[30vh] py-0 pb-0 mb-0">
       <div className="max-w-6xl mx-auto px-2 sm:px-4">
-        {/* Added padding-top for vertical spacing above the heading */}
         <div className="pt-10">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-2 tracking-tight uppercase">
             <span className="text-emerald-500">THE CONTENDERS</span>
@@ -46,7 +49,19 @@ export default function FeaturesSection() {
               aria-label={`View ${team.name} details`}
               tabIndex={0}
             >
-              <span className="text-3xl sm:text-4xl mb-1">{team.logo}</span>
+              {/* Render image or emoji based on logo type */}
+              {isImageLogo(team.logo) ? (
+                <Image
+                  src={team.logo}
+                  alt={team.name}
+                  width={48}
+                  height={48}
+                  className="mb-1 object-contain"
+                />
+              ) : (
+                <span className="text-3xl sm:text-4xl mb-1">{team.logo}</span>
+              )}
+
               <span className="text-base font-semibold text-gray-900">
                 {team.name}
               </span>
