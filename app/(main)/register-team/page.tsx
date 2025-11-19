@@ -891,11 +891,50 @@ export default function RegisterTeamPage() {
                         <span className="font-bold text-emerald-700">
                           Payment Details:
                         </span>
-                        <span className="text-lg font-black text-emerald-700">
-                          UPI Id - yespay.smessi33319@yesbankltd Account
-                          details: A/C No. - 143261900001540 IFSC code -
-                          YESB0001432 Name -  Luplu apparel
-                        </span>
+                        <div className="space-y-3">
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-sm font-semibold text-gray-600">
+                              UPI ID:
+                            </span>
+                            <span className="text-lg font-black text-emerald-700">
+                              yespay.smessi33319@yesbankltd
+                            </span>
+                          </div>
+
+                          <div className="border-t border-gray-200 pt-3">
+                            <span className="text-sm font-semibold text-gray-600 block mb-2">
+                              Account Details:
+                            </span>
+                            <div className="space-y-2 ml-4">
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500">
+                                  Account Number
+                                </span>
+                                <span className="text-base font-bold text-emerald-700">
+                                  143261900001540
+                                </span>
+                              </div>
+
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500">
+                                  IFSC Code
+                                </span>
+                                <span className="text-base font-bold text-emerald-700">
+                                  YESB0001432
+                                </span>
+                              </div>
+
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500">
+                                  Account Name
+                                </span>
+                                <span className="text-base font-bold text-emerald-700">
+                                  Luplu Apparel
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
