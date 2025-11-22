@@ -141,12 +141,12 @@ function LogosSlideshow() {
               <div
                 className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl"
                 style={{
-                  background: "#1a1a1a",
+                  background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
                   borderRadius: 16,
                   height: 90,
                   width: 150,
                   boxShadow: "0 4px 20px rgba(53, 111, 53, 0.25)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(16, 185, 129, 0.2)",
                 }}
               >
                 <Image
@@ -164,11 +164,11 @@ function LogosSlideshow() {
               <span
                 className="mt-3 text-xs sm:text-sm font-extrabold uppercase tracking-wide text-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 group-hover:bg-emerald-600 group-hover:scale-105"
                 style={{
-                  color: "#ffffff",
-                  background: "#1a1a1a",
+                  color: "#059669",
+                  background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
                   letterSpacing: "0.05em",
                   boxShadow: "0 2px 12px rgba(53, 111, 53, 0.2)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(16, 185, 129, 0.2)",
                 }}
               >
                 {sponsor.name}

@@ -81,13 +81,13 @@ export default function BlogPage() {
       excerpt:
         "Discover how ROCK8 is transforming the landscape of amateur football, creating opportunities for players to shine and communities to unite through the beautiful game.",
       content: [
-        "In the heart of every football community lies untapped potential. ROCK8 isn't just a tournament—it's a movement designed to bring grassroots football to the forefront of competitive sports.",
+        "In the heart of every football community lies untapped potential. ROCK8 isn't just a tournament it's a movement designed to bring grassroots football to the forefront of competitive sports.",
         "Our vision extends beyond the pitch. We're building an ecosystem where talent meets opportunity, where local heroes become recognized athletes, and where every match tells a story worth sharing.",
         "The ROCK8 format introduces innovative gameplay mechanics that keep matches intense and exciting. With shorter, high-energy games, every second counts, every goal matters, and every team has a fighting chance to make their mark.",
         "We believe in the power of community. That's why ROCK8 integrates cutting-edge technology with traditional football values, creating a platform that celebrates both skill and sportsmanship. Our digital leaderboards, live match updates, and community engagement tools ensure that every player's journey is documented and celebrated.",
-        "But what truly sets ROCK8 apart is our commitment to accessibility. We're removing barriers to entry, providing professional-grade experiences at the grassroots level, and ensuring that talent—not resources—determines success.",
+        "But what truly sets ROCK8 apart is our commitment to accessibility. We're removing barriers to entry, providing professional-grade experiences at the grassroots level, and ensuring that talent not resources determines success.",
         "Join us as we redefine what amateur football can be. Whether you're a seasoned player or just starting your journey, ROCK8 offers a stage where passion meets performance, and dreams become reality.",
-        "The future of football isn't just about the elite leagues—it's about empowering communities, one match at a time. Welcome to the ROCK8 revolution.",
+        "The future of football isn't just about the elite leagues it's about empowering communities, one match at a time. Welcome to the ROCK8 revolution.",
       ],
       author: {
         name: "WeFootballin Team",

@@ -4,23 +4,23 @@ import React, { useState } from "react";
 const faqs = [
   {
     question: "How do I join a WeFootballin' game?",
-    answer:
-      "You can join a game through our regular hosted pickup matches in GK 1 and GK 2. We announce games in advance — simply register your spot, show up, and play. If you're an individual player, we'll slot you into a balanced team. If you already have a group, you can register together. No team? No problem — we'll help you find one!",
+    answer: "Register and book your spot through our website or WhatsApp.",
   },
   {
     question: "Do I need to be part of a fixed team to play?",
-    answer:
-      "Not at all. WeFootballin' is designed for everyone — whether you play solo or as part of a crew. •	Solo players can join open pickup games.•	Groups or teams can register together and compete against others. Our system helps individuals and teams connect easily — ensuring that everyone gets to play, every time.",
+    answer: "No, you can join alone and we’ll place you in a team.",
   },
   {
     question: "Where is WeFootballin' currently active?",
-    answer:
-      "We're currently operational in Greater Kailash 1 (GK 1) and Greater Kailash 2 (GK 2), where we host regular games and mini-tournaments. We're also working on expanding to new areas soon — so stay tuned for updates on our next locations!",
+    answer: "We are currently active in South Delhi.",
   },
   {
     question: "How can I stay updated on upcoming matches or tournaments?",
-    answer:
-      "We post all match schedules, registration links, and updates through our official communication channels — including WhatsApp groups, Instagram, and our community announcements. You can also reach out directly to our coordinators in GK 1 or GK 2 to join the player list and get notified of upcoming games.",
+    answer: "Follow our social pages or join our WhatsApp broadcast.",
+  },
+  {
+    question: "What skill level do I need to play?",
+    answer: "All skill levels are welcome, from beginners to advanced.",
   },
 ];
 
