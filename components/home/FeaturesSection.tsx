@@ -6,7 +6,7 @@ import { ChevronDown, Trophy, Target, Users } from "lucide-react";
 
 const teams = [
   { name: "Spartans FC", logo: "/images/spartans.png", captain: "John Smith" },
-  { name: "Phoenix United", logo: "🔥", captain: "Mike Johnson" },
+  { name: "FBB FC", logo: "/images/F2.png", captain: "Mike Johnson" },
   { name: "Storm Riders", logo: "⛈️", captain: "David Lee" },
   { name: "Velocity SC", logo: "💨", captain: "Chris Brown" },
   { name: "Titans FC", logo: "🏔️", captain: "James Wilson" },
@@ -40,7 +40,7 @@ export default function FeaturesSection() {
         <p className="text-gray-500 text-base sm:text-lg mb-8 text-center">
           16 elite squads, one ultimate champion.
         </p>
-        
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 sm:gap-8">
           {teams.map((team, idx) => (
             <div key={team.name} className="flex flex-col items-center">
@@ -54,8 +54,8 @@ export default function FeaturesSection() {
                 {/* Team Logo */}
                 <motion.div
                   className="relative"
-                  animate={{ 
-                    rotate: active === idx ? [0, -5, 5, -5, 5, 0] : 0 
+                  animate={{
+                    rotate: active === idx ? [0, -5, 5, -5, 5, 0] : 0,
                   }}
                   transition={{ duration: 0.5 }}
                 >
@@ -73,7 +73,7 @@ export default function FeaturesSection() {
                       {team.logo}
                     </span>
                   )}
-                  
+
                   {/* Rank Badge */}
                   <span className="absolute -top-2 -right-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
                     #{idx + 1}
@@ -110,40 +110,64 @@ export default function FeaturesSection() {
                       <div className="flex items-center gap-2 mb-3 pb-3 border-b border-emerald-200">
                         <Users className="w-4 h-4 text-emerald-600" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 font-semibold">Team Captain</p>
-                          <p className="text-sm font-bold text-gray-900">{team.captain}</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Team Captain
+                          </p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {team.captain}
+                          </p>
                         </div>
                       </div>
 
                       {/* Stats Grid */}
                       <div className="grid grid-cols-2 gap-2">
                         <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <p className="text-xs text-gray-500 font-semibold">Wins</p>
-                          <p className="text-lg font-black text-emerald-600">0</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Wins
+                          </p>
+                          <p className="text-lg font-black text-emerald-600">
+                            0
+                          </p>
                         </div>
                         <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <p className="text-xs text-gray-500 font-semibold">Losses</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Losses
+                          </p>
                           <p className="text-lg font-black text-red-500">0</p>
                         </div>
                         <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <p className="text-xs text-gray-500 font-semibold">Draws</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Draws
+                          </p>
                           <p className="text-lg font-black text-gray-600">0</p>
                         </div>
                         <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <p className="text-xs text-gray-500 font-semibold">Points</p>
-                          <p className="text-lg font-black text-emerald-600">0</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Points
+                          </p>
+                          <p className="text-lg font-black text-emerald-600">
+                            0
+                          </p>
                         </div>
                       </div>
 
                       {/* Goals */}
                       <div className="grid grid-cols-2 gap-2 mt-2">
                         <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <p className="text-xs text-gray-500 font-semibold">Goals For</p>
-                          <p className="text-base font-black text-blue-600">0</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Goals For
+                          </p>
+                          <p className="text-base font-black text-blue-600">
+                            0
+                          </p>
                         </div>
                         <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <p className="text-xs text-gray-500 font-semibold">Goals Against</p>
-                          <p className="text-base font-black text-orange-600">0</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            Goals Against
+                          </p>
+                          <p className="text-base font-black text-orange-600">
+                            0
+                          </p>
                         </div>
                       </div>
                     </div>
