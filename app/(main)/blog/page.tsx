@@ -236,7 +236,7 @@ export default function BlogPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative w-full min-h-screen"
+          className="relative w-full min-h-screen pt-24 md:pt-28"
         >
           {/* Floating Back Button */}
           <motion.button
@@ -245,7 +245,7 @@ export default function BlogPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setSelectedPost(null)}
-            className="fixed top-20 left-4 md:left-8 z-50 flex items-center gap-2 px-4 py-3 bg-white border-2 border-emerald-300 text-emerald-600 font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-emerald-50 transition-all"
+            className="fixed top-24 md:top-28 left-4 md:left-8 z-50 flex items-center gap-2 px-4 py-3 bg-white border-2 border-emerald-300 text-emerald-600 font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-emerald-50 transition-all"
           >
             <ArrowRight className="w-5 h-5 rotate-180" />
             <span className="hidden md:inline">Back to all posts</span>
@@ -253,7 +253,7 @@ export default function BlogPage() {
           </motion.button>
 
           {/* Magazine Container - Fits Content Exactly */}
-          <div className="flex justify-center items-start pt-8 pb-16">
+          <div className="flex justify-center items-start pt-4 pb-16">
             <article className="bg-white shadow-2xl w-fit mx-auto">
               {selectedPost.pages ? (
                 <div>
