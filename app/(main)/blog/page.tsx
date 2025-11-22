@@ -19,6 +19,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 interface BlogPost {
@@ -111,52 +112,36 @@ export default function BlogPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const nextPage = () => {
-    if (selectedPost?.pages && selectedPost.pages.length > 0) {
-      setCurrentPage((prev) =>
-        prev === selectedPost.pages!.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
-
-  const prevPage = () => {
-    if (selectedPost?.pages && selectedPost.pages.length > 0) {
-      setCurrentPage((prev) =>
-        prev === 0 ? selectedPost.pages!.length - 1 : prev - 1
-      );
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-emerald-50/30 to-white">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0fdf4_1px,transparent_1px),linear-gradient(to_bottom,#f0fdf4_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
+      {!selectedPost ? (
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
           >
-            Our Blog
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-4"
+            >
+              Our Blog
+            </motion.div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
+              Stories from the{" "}
+              <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                Pitch
+              </span>
+            </h1>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Insights, updates, and inspiration from the world of grassroots
+              football
+            </p>
           </motion.div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
-            Stories from the{" "}
-            <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-              Pitch
-            </span>
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Insights, updates, and inspiration from the world of grassroots
-            football
-          </p>
-        </motion.div>
 
-        {!selectedPost ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post, index) => (
               <motion.article
@@ -246,198 +231,194 @@ export default function BlogPage() {
               </motion.article>
             ))}
           </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="max-w-4xl mx-auto"
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative w-full min-h-screen"
+        >
+          {/* Floating Back Button */}
+          <motion.button
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setSelectedPost(null)}
+            className="fixed top-20 left-4 md:left-8 z-50 flex items-center gap-2 px-4 py-3 bg-white border-2 border-emerald-300 text-emerald-600 font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-emerald-50 transition-all"
           >
-            <motion.button
-              whileHover={{ x: -5 }}
-              onClick={() => setSelectedPost(null)}
-              className="flex items-center gap-2 text-emerald-600 font-semibold mb-8 hover:text-emerald-700 transition-colors"
-            >
-              <ArrowRight className="w-5 h-5 rotate-180" />
-              Back to all posts
-            </motion.button>
+            <ArrowRight className="w-5 h-5 rotate-180" />
+            <span className="hidden md:inline">Back to all posts</span>
+            <span className="md:hidden">Back</span>
+          </motion.button>
 
-            <article className="bg-white rounded-2xl overflow-hidden border border-emerald-100 shadow-lg">
+          {/* Magazine Container - Fits Content Exactly */}
+          <div className="flex justify-center items-start pt-8 pb-16">
+            <article className="bg-white shadow-2xl w-fit mx-auto">
               {selectedPost.pages ? (
                 <div>
-                  <div className="relative h-96 md:h-[600px] overflow-hidden bg-gray-900">
-                    <AnimatePresence mode="wait">
+                  {/* Magazine Flow - All Pages Vertically */}
+                  <div className="space-y-0">
+                    {selectedPost.pages.map((page, index) => (
                       <motion.div
-                        key={currentPage}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="relative w-full h-full"
+                        key={index}
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.6 }}
+                        className="relative w-full"
                       >
-                        <Image
-                          src={selectedPost.pages[currentPage]}
-                          alt={`Page ${currentPage + 1}`}
-                          fill
-                          className="object-contain"
-                        />
+                        {/* Section titles between pages */}
+                        {index === 1 && (
+                          <div className="bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-500 py-12 px-8 text-center">
+                            <h2 className="text-3xl md:text-4xl font-black text-white">
+                              What We Do
+                            </h2>
+                          </div>
+                        )}
+                        {index === 3 && (
+                          <div className="bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-500 py-12 px-8 text-center">
+                            <h2 className="text-3xl md:text-4xl font-black text-white">
+                              Community Impact
+                            </h2>
+                          </div>
+                        )}
+
+                        <div className="relative w-full">
+                          <Image
+                            src={page}
+                            alt={`${selectedPost.title} - Page ${index + 1}`}
+                            width={1200}
+                            height={1697}
+                            className="w-full h-auto"
+                            priority={index === 0}
+                          />
+                        </div>
                       </motion.div>
-                    </AnimatePresence>
-
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={prevPage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 md:p-3 bg-white/80 hover:bg-white text-gray-900 rounded-full transition-all shadow-lg z-10"
-                    >
-                      <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={nextPage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 md:p-3 bg-white/80 hover:bg-white text-gray-900 rounded-full transition-all shadow-lg z-10"
-                    >
-                      <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
-                    </motion.button>
-
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                      Page {currentPage + 1} of {selectedPost.pages.length}
-                    </div>
-
-                    <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2">
-                      {selectedPost.pages.map((_, idx) => (
-                        <motion.button
-                          key={idx}
-                          onClick={() => setCurrentPage(idx)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            idx === currentPage
-                              ? "bg-white w-6"
-                              : "bg-white/50 hover:bg-white/70"
-                          }`}
-                        />
-                      ))}
-                    </div>
+                    ))}
                   </div>
 
-                  <div className="p-8 md:p-12">
-                    <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-100">
-                      <div>
-                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">
-                          {selectedPost.title}
-                        </h1>
-                        <div className="flex items-center gap-6 text-gray-600">
-                          <span className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            {selectedPost.date}
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            {selectedPost.readTime}
-                          </span>
+                  {/* Footer Section */}
+                  <div className="bg-gradient-to-b from-emerald-50 to-white p-8 md:p-12">
+                    <div className="max-w-4xl mx-auto">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-8 border-b border-emerald-200 gap-4">
+                        <div>
+                          <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">
+                            {selectedPost.title}
+                          </h1>
+                          <div className="flex items-center gap-4 text-gray-600 text-sm">
+                            <span className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {selectedPost.date}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              {selectedPost.readTime}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setLiked(!liked)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              liked
+                                ? "bg-red-50 text-red-500"
+                                : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500"
+                            }`}
+                          >
+                            <Heart
+                              className="w-5 h-5"
+                              fill={liked ? "currentColor" : "none"}
+                            />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setBookmarked(!bookmarked)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              bookmarked
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600"
+                            }`}
+                          >
+                            <Bookmark
+                              className="w-5 h-5"
+                              fill={bookmarked ? "currentColor" : "none"}
+                            />
+                          </motion.button>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => setLiked(!liked)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            liked
-                              ? "bg-red-50 text-red-500"
-                              : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500"
-                          }`}
-                        >
-                          <Heart
-                            className="w-5 h-5"
-                            fill={liked ? "currentColor" : "none"}
-                          />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => setBookmarked(!bookmarked)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            bookmarked
-                              ? "bg-emerald-50 text-emerald-600"
-                              : "bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600"
-                          }`}
-                        >
-                          <Bookmark
-                            className="w-5 h-5"
-                            fill={bookmarked ? "currentColor" : "none"}
-                          />
-                        </motion.button>
-                      </div>
-                    </div>
-
-                    <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                      {selectedPost.excerpt}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {selectedPost.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-4 py-2 bg-emerald-50 text-emerald-700 font-medium rounded-lg"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="pt-8 border-t border-gray-100">
-                      <p className="text-gray-900 font-semibold mb-4 flex items-center gap-2">
-                        <Share2 className="w-5 h-5" />
-                        Share this post
+                      <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                        {selectedPost.excerpt}
                       </p>
-                      <div className="flex flex-wrap gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleShare("twitter")}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                        >
-                          <Twitter className="w-4 h-4" />
-                          Twitter
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleShare("facebook")}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                        >
-                          <Facebook className="w-4 h-4" />
-                          Facebook
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleShare("linkedin")}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-800 rounded-lg hover:bg-blue-100 transition-colors"
-                        >
-                          <Linkedin className="w-4 h-4" />
-                          LinkedIn
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={handleCopyLink}
-                          className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
-                        >
-                          {copied ? (
-                            <>
-                              <Check className="w-4 h-4" />
-                              Copied!
-                            </>
-                          ) : (
-                            <>
-                              <Link2 className="w-4 h-4" />
-                              Copy Link
-                            </>
-                          )}
-                        </motion.button>
+
+                      <div className="flex flex-wrap gap-2 mb-8">
+                        {selectedPost.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-4 py-2 bg-emerald-50 text-emerald-700 font-medium rounded-lg border border-emerald-200"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="pt-8 border-t border-emerald-200">
+                        <p className="text-gray-900 font-semibold mb-4 flex items-center gap-2">
+                          <Share2 className="w-5 h-5" />
+                          Share this magazine
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleShare("twitter")}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            <Twitter className="w-4 h-4" />
+                            Twitter
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleShare("facebook")}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            <Facebook className="w-4 h-4" />
+                            Facebook
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleShare("linkedin")}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-800 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                            LinkedIn
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleCopyLink}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
+                          >
+                            {copied ? (
+                              <>
+                                <Check className="w-4 h-4" />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Link2 className="w-4 h-4" />
+                                Copy Link
+                              </>
+                            )}
+                          </motion.button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -604,9 +585,9 @@ export default function BlogPage() {
                 </>
               )}
             </article>
-          </motion.div>
-        )}
-      </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
