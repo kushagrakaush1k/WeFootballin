@@ -352,8 +352,6 @@ export default function RegisterTeamPage() {
         .insert(playersData);
 
       if (playersError) throw playersError;
-
-      setHasExistingTeam(true);
       setStep(4);
     } catch (error: any) {
       console.error("Registration error:", error);
