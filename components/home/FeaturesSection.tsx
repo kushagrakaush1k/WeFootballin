@@ -7,7 +7,7 @@ import { ChevronDown, Trophy, Target, Users } from "lucide-react";
 const teams = [
   { name: "Spartans FC", logo: "/images/spartans.png", captain: "John Smith" },
   { name: "FBB FC", logo: "/images/F2.png", captain: "Mike Johnson" },
-  { name: "Storm Riders", logo: "⛈️", captain: "David Lee" },
+  { name: "Gladiators FC", logo: "/images/gladiators.png", captain: "David Lee" },
   { name: "Velocity SC", logo: "💨", captain: "Chris Brown" },
   { name: "Titans FC", logo: "🏔️", captain: "James Wilson" },
   { name: "Apex Warriors", logo: "⚔️", captain: "Robert Garcia" },
