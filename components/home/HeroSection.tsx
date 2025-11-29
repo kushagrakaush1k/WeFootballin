@@ -19,7 +19,7 @@ const HeroSection = () => {
     "https://drive.google.com/file/d/1xDOhSvLpaSbrZIwb_yJCoalV-6KB4nRT/view?usp=sharing";
 
   useEffect(() => {
-    const deadline = new Date("2025-11-28T23:59:59").getTime();
+    const deadline = new Date("2025-12-06T23:59:59").getTime();
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const diff = deadline - now;
