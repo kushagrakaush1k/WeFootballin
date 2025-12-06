@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -12,9 +12,9 @@ import {
   LogOut,
   User,
   ChevronDown,
-  BookOpen,
   Zap,
   Instagram,
+  Trophy,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -36,11 +36,39 @@ export function Navbar() {
   const supabase = createClient();
   const pathname = usePathname();
 
-  // Dynamic color for nav links depending on route
-  const isDarkNavbar = pathname === "/"; // change this if you have multiple dark-background pages
+  const isDarkNavbar = pathname === "/";
+
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+    if (profile) {
+      setUser(profile);
+    }
+  }, [supabase]);
+
+  const getUser = useCallback(async () => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("Session error:", error);
+      setUser(null);
+      return;
+    }
+
+    if (session?.user) {
+      await fetchUserProfile(session.user.id);
+    } else {
+      setUser(null);
+    }
+  }, [supabase, fetchUserProfile]);
 
   useEffect(() => {
-    // Try session restore on mount for persistent login
     getUser();
 
     const {
@@ -56,7 +84,7 @@ export function Navbar() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase, fetchUserProfile, getUser]);
 
   useEffect(() => {
     setActiveLink(pathname);
@@ -77,37 +105,6 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  const getUser = async () => {
-    // Force refresh session
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-
-    if (error) {
-      console.error("Session error:", error);
-      setUser(null);
-      return;
-    }
-
-    if (session?.user) {
-      await fetchUserProfile(session.user.id);
-    } else {
-      setUser(null);
-    }
-  };
-
-  const fetchUserProfile = async (userId: string) => {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
-    if (profile) {
-      setUser(profile);
-    }
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -117,11 +114,11 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "HOME" },
     { href: "/pickup", label: "PICKUP" },
+    { href: "/leaderboard", label: "LEADERBOARD" },
     { href: "/blog", label: "BLOG" },
   ];
   const leagueLinks = [{ href: "/register-team", label: "ROCK8", icon: Zap }];
 
-  // Helper for color: white on dark pages, emerald/dark on light
   const navLinkColor = (linkHref: string) =>
     activeLink === linkHref
       ? "text-emerald-400"
@@ -141,7 +138,7 @@ export function Navbar() {
       >
         <div className="max-w-full mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between h-28">
-            {/* Logo - Left Side */}
+            {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -223,9 +220,8 @@ export function Navbar() {
               </div>
             </div>
 
-            {/* Right Section - Auth & User */}
+            {/* Right Section */}
             <div className="hidden lg:flex items-center gap-6">
-              {/* Instagram Button */}
               <motion.a
                 href="https://instagram.com/we_footballin"
                 target="_blank"
@@ -404,7 +400,6 @@ export function Navbar() {
                     </Link>
                   ))}
 
-                  {/* Mobile Leagues */}
                   <div className="space-y-2">
                     <button
                       onClick={() => setShowLeaguesMenu(!showLeaguesMenu)}
@@ -436,7 +431,6 @@ export function Navbar() {
                   </div>
                 </div>
 
-                {/* Mobile Instagram */}
                 <div className="flex justify-center pt-4 border-t border-emerald-200">
                   <motion.a
                     href="https://instagram.com/we_footballin"

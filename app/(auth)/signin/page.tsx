@@ -265,7 +265,7 @@ export default function AuthPage() {
             </h1>
             <p className="text-gray-600 text-sm sm:text-base">
               {isSignUp
-                ? "Create your WeFootballin' account"
+                ? "Create your WeFootballin&apos; account"
                 : "Sign in to continue"}
             </p>
           </motion.div>
@@ -552,7 +552,7 @@ export default function AuthPage() {
             <p className="text-gray-600 text-sm">
               {isSignUp
                 ? "Already have an account? "
-                : "Don't have an account? "}
+                : "Don&apos;t have an account? "}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 onClick={() => {
