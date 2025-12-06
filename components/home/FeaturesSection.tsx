@@ -5,22 +5,34 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Trophy, Target, Users } from "lucide-react";
 
 const teams = [
-  { name: "Spartans FC", logo: "/images/spartans.png", captain: "John Smith" },
-  { name: "FBB FC", logo: "/images/F2.png", captain: "Mike Johnson" },
-  { name: "Gladiators FC", logo: "/images/gladiators.png", captain: "David Lee" },
-  { name: "Velocity SC", logo: "💨", captain: "Chris Brown" },
-  { name: "Titans FC", logo: "🏔️", captain: "James Wilson" },
-  { name: "Apex Warriors", logo: "⚔️", captain: "Robert Garcia" },
-  { name: "Dynasty FC", logo: "👑", captain: "Tom Martinez" },
-  { name: "Fusion United", logo: "💫", captain: "Alex Rodriguez" },
-  { name: "Blaze FC", logo: "🔶", captain: "Mark Davis" },
-  { name: "Legends SC", logo: "⭐", captain: "Paul Anderson" },
-  { name: "Elite Rangers", logo: "🎯", captain: "Kevin Thomas" },
-  { name: "Vortex United", logo: "🌪️", captain: "Brian Taylor" },
-  { name: "Lunar Wolves", logo: "🐺", captain: "Steve Moore" },
-  { name: "Shadow Hawks", logo: "🦅", captain: "Dan Jackson" },
-  { name: "Crimson Eagles", logo: "🦅", captain: "Eric White" },
-  { name: "Royal Panthers", logo: "🐆", captain: "Ryan Harris" },
+  { name: "Spartans FC", logo: "/images/spartans.png", captain: "Mandy Rawat" },
+  { name: "FBB FC", logo: "/images/F2.png", captain: "Vansh Khattar" },
+  {
+    name: "Gladiators FC",
+    logo: "/images/gladiators.png",
+    captain: "Shaurya Sharma",
+  },
+  { name: "DoMeFC", logo: "/images/domepls.jpg", captain: "Vasu (KING)" },
+  { name: "LUPLU FC", logo: "/images/lupluteam.png", captain: "Mukul Mawri" },
+  { name: "ABCDE FC", logo: "/images/abcde.jpg", captain: "Nick Shayden" },
+  { name: "NEXUS", logo: "/images/nexus.jpg", captain: "Shubham Lochan" },
+  {
+    name: "DELHI ELITES",
+    logo: "/images/delhieli.jpg",
+    captain: "Ayush Bhuttan",
+  },
+  { name: "FC BHARAT", logo: "/images/fcbharat.jpg", captain: "Manav" },
+  { name: "KARGIL FC", logo: "/images/kargilfc.png", captain: "Sagar Rana" },
+  {
+    name: "THE FALSE EIGHTS",
+    logo: "/images/thefalseeights.jpg",
+    captain: "Shashank Barman",
+  },
+  { name: "BOHO FC", logo: "/images/boho.jpg", captain: "Paras Maan" },
+  { name: "RIZZLERS FC", logo: "/images/rizz.png", captain: "Ashu" },
+  { name: "VETERANS", logo: "/images/veterans.jpg", captain: "Ayush" },
+  { name: "FC AREANS", logo: "/images/afc.jpg", captain: "KJ" },
+  { name: "CHEETAH FC", logo: "/images/cheetah.jpg", captain: "Rohit" },
 ];
 
 export default function FeaturesSection() {
